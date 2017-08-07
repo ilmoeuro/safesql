@@ -1,7 +1,3 @@
-import ceylon.language.meta.model {
-    Class,
-    Attribute
-}
 /* Copyright 2017 Ilmo Euro
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +12,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-class SqlEmitter(Anything(String) emit) {
-    void bareColumnName(Attribute<> column) {
-        value decl = column.declaration;
+import ceylon.language.meta.model {
+    Class,
+    Attribute
+}
+
+class SqlEmitter<Subject>(Anything(String) emit) {
+    void bareColumnName(Attribute<> attribute) {
+        value decl = attribute.declaration;
         value annotations = decl.annotations<ColumnAnnotation>();
         assert(exists annotation = annotations.first);
         emit("\"");
@@ -30,19 +31,19 @@ class SqlEmitter(Anything(String) emit) {
         emit("\"");
     }
 
-    void columnName(Column column) {
-        if (is AliasedColumn column) {
+    void columnName(Column<Subject> column) {
+        if (is AliasedColumn<Subject> column) {
             emit("\"");
             emit(column.table.name);
             emit("\".");
             bareColumnName(column.attribute);
         }
-        if (is Attribute<> column) {
-            bareColumnName(column);
+        if (is BareColumn<Subject> column) {
+            bareColumnName(column.attribute);
         }
     }
 
-    void bareTableName(Class<> table) {
+    void bareTableName(Class<Subject> table) {
         value decl = table.declaration;
         value annotations = decl.annotations<TableAnnotation>();
         assert(exists annotation = annotations.first);
@@ -55,97 +56,97 @@ class SqlEmitter(Anything(String) emit) {
         emit("\"");
     }
     
-    void tableName(Table table) {
+    void tableName(Table<Subject> table) {
         switch (table)
-        case (is AliasedTable) {
+        case (is AliasedTable<Subject>) {
             bareTableName(table.cls);
             emit(" AS \"");
             emit(table.name);
             emit("\"");
         }
-        case (is Class<>) {
+        case (is Class<Subject>) {
             bareTableName(table);
         }
     }
     
-    void columnList(Table table) {
-        Class<> cls;
+    void columnList(Table<Subject> table) {
+        Class<Subject> cls;
         switch (table)
-        case (is AliasedTable) {
+        case (is AliasedTable<Subject>) {
             cls = table.cls;
         }
-        case (is Class<>) {
+        case (is Class<Subject>) {
             cls = table;
         }
-        value attributes = cls.getAttributes<>(`ColumnAnnotation`);
-        for (i -> attribute in attributes.indexed) {
+        value attrs = cls.getAttributes<Anything, Anything>(`ColumnAnnotation`);
+        for (i -> attribute in attrs.indexed) {
             if (i != 0) {
                 emit(",");
             }
 
             switch (table)
-            case (is AliasedTable) {
+            case (is AliasedTable<Subject>) {
                 columnName(table.column(attribute));
             }
-            case (is Class<>) {
-                columnName(attribute);
+            case (is Class<Subject>) {
+                bareColumnName(attribute);
             }
         }
     }
     
-    void tableList(Table table) {
+    void tableList(Table<Subject> table) {
         tableName(table);
     }
 
-    void condition(Condition where) {
+    void condition(Condition<Subject> where) {
         switch (where) 
-        case (is Equal | LessThan | AtMost | GreaterThan | AtLeast) {
+        case (is Compare<Subject>) {
             columnName(where.lhs);
             switch (where)
-            case (is Equal) { emit("=");  }
-            case (is LessThan) { emit("<");  }
-            case (is AtMost) { emit("<="); }
-            case (is GreaterThan) { emit(">");  }
-            case (is AtLeast) { emit(">="); }
+            case (is Equal<Subject>)       { emit("=");  }
+            case (is LessThan<Subject>)    { emit("<");  }
+            case (is AtMost<Subject>)      { emit("<="); }
+            case (is GreaterThan<Subject>) { emit(">");  }
+            case (is AtLeast<Subject>)     { emit(">="); }
             emit("?");
         }
-        case (is And) {
+        case (is And<Subject>) {
             emit("(");
             condition(where.left);
             emit(") AND (");
             condition(where.right);
             emit(")");
         }
-        case (is Or) {
+        case (is Or<Subject>) {
             emit("(");
             condition(where.left);
             emit(") OR (");
             condition(where.right);
             emit(")");
         }
-        case (is Not) {
+        case (is Not<Subject>) {
             emit("NOT (");
             condition(where.inner);
             emit(")");
         }
     }
 
-    shared void select(Table cls) {
+    shared void select(Table<Subject> cls) {
         emit("SELECT ");
         columnList(cls);
     }
     
-    shared void from(Table cls) {
+    shared void from(Table<Subject> cls) {
         emit(" FROM ");
         tableList(cls);
     }
     
-    shared void where(Condition where) {
+    shared void where(Condition<Subject> where) {
         emit(" WHERE ");
         condition(where);
     }
     
-    shared void orderBy({Ordering+} orderings) {
+    shared void orderBy({Ordering<Subject>+} orderings) {
         emit(" ORDER BY ");
         
         for (i -> ordering in orderings.indexed) {
@@ -154,10 +155,10 @@ class SqlEmitter(Anything(String) emit) {
             }
             
             columnName(ordering.column);
-            if (is Asc ordering) {
+            if (is Asc<Subject> ordering) {
                 emit(" ASC");
             }
-            if (is Desc ordering) {
+            if (is Desc<Subject> ordering) {
                 emit(" DESC");
             }
         }

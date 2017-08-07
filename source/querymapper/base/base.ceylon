@@ -11,6 +11,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
+
 import ceylon.collection {
     MutableList,
     ArrayList
@@ -22,24 +23,6 @@ import ceylon.language.meta.declaration {
 import ceylon.language.meta.model {
     Class,
     Attribute
-}
-
-shared alias Table => Class<> | AliasedTable;
-
-shared alias Column => Attribute<> | AliasedColumn;
-
-shared final class AliasedTable(name, cls) {
-    shared String name;
-    shared Class<> cls;
-    
-    shared AliasedColumn column(Attribute<> attribute) {
-        return AliasedColumn(this, attribute);
-    }
-}
-
-shared sealed class AliasedColumn(table, attribute) {
-    shared AliasedTable table;
-    shared Attribute<> attribute;
 }
 
 "The annotation class for [[column]] annotation"
@@ -84,7 +67,39 @@ shared annotation TableAnnotation table(
 )
         => TableAnnotation(name);
 
-shared interface Condition of Compare | BinaryCondition | UnaryCondition {
+shared alias Table<out Subject = Anything> => Class<Subject> | AliasedTable<Subject>;
+
+shared alias Column<out Subject = Anything> => BareColumn<Subject> | AliasedColumn<Subject>;
+
+suppressWarnings("unusedDeclaration")
+shared final sealed class BareColumn<out Subject = Anything>(attribute) {
+    shared Attribute<> attribute;
+}
+
+shared BareColumn<Subject> col<Subject>(Attribute<Subject, Anything> attr) {
+    return BareColumn<Subject>(attr);
+}
+
+shared final class AliasedTable<out Subject = Anything>(name, cls) {
+    shared String name;
+    shared Class<Subject> cls;
+    
+    shared AliasedColumn<Subject> column(
+        Attribute<Subject, Anything> attribute
+    ) {
+        return AliasedColumn(this, attribute);
+    }
+}
+
+shared sealed class AliasedColumn<out Subject = Anything>(table, attribute) {
+    shared AliasedTable<Subject> table;
+    shared Attribute<> attribute;
+}
+
+shared interface Condition<Subject>
+        of Compare<Subject>
+        | BinaryCondition<Subject>
+        | UnaryCondition<Subject> {
     
 }
 
@@ -92,74 +107,80 @@ shared final class Literal(literal) {
     shared Object literal;
 }
 
-shared interface Compare of Equal
-                            | AtMost
-                            | LessThan
-                            | AtLeast
-                            | GreaterThan
-        satisfies Condition {
-    shared formal Column lhs;
+shared interface Compare<Subject = Anything>
+        of Equal<Subject>
+        | AtMost<Subject>
+        | LessThan<Subject>
+        | AtLeast<Subject>
+        | GreaterThan<Subject>
+        satisfies Condition<Subject> {
+    shared formal Column<Subject> lhs;
     shared formal Literal rhs;
 }
 
-shared class Equal(lhs, rhs) satisfies Compare {
-    shared actual Column lhs;
+shared class Equal<Subject>(lhs, rhs) satisfies Compare<Subject> {
+    shared actual Column<Subject> lhs;
     shared actual Literal rhs;
 }
 
-shared class AtMost(lhs, rhs) satisfies Compare {
-    shared actual Column lhs;
+shared class AtMost<Subject>(lhs, rhs) satisfies Compare<Subject> {
+    shared actual Column<Subject> lhs;
     shared actual Literal rhs;
 }
 
-shared class LessThan(lhs, rhs) satisfies Compare {
-    shared actual Column lhs;
+shared class LessThan<Subject>(lhs, rhs) satisfies Compare<Subject> {
+    shared actual Column<Subject> lhs;
     shared actual Literal rhs;
 }
 
-shared class AtLeast(lhs, rhs) satisfies Compare {
-    shared actual Column lhs;
+shared class AtLeast<Subject>(lhs, rhs) satisfies Compare<Subject> {
+    shared actual Column<Subject> lhs;
     shared actual Literal rhs;
 }
 
-shared class GreaterThan(lhs, rhs) satisfies Compare {
-    shared actual Column lhs;
+shared class GreaterThan<Subject> (lhs, rhs) satisfies Compare<Subject>  {
+    shared actual Column<Subject> lhs;
     shared actual Literal rhs;
 }
 
-shared interface BinaryCondition of And | Or satisfies Condition {
-    shared formal Condition left;
-    shared formal Condition right;
+shared interface BinaryCondition<Subject = Anything>
+        of And<Subject>
+        | Or<Subject>
+        satisfies Condition<Subject> {
+    shared formal Condition<Subject> left;
+    shared formal Condition<Subject> right;
 }
 
-shared class And(left, right) satisfies BinaryCondition {
-    shared actual Condition left;
-    shared actual Condition right;
+shared class And<Subject>(left, right) satisfies BinaryCondition<Subject> {
+    shared actual Condition<Subject> left;
+    shared actual Condition<Subject> right;
 }
 
-shared class Or(left, right) satisfies BinaryCondition {
-    shared actual Condition left;
-    shared actual Condition right;
+shared class Or<Subject>(left, right) satisfies BinaryCondition<Subject> {
+    shared actual Condition<Subject> left;
+    shared actual Condition<Subject> right;
 }
 
-shared interface UnaryCondition of Not satisfies Condition {
-    shared formal Condition inner;
+shared interface UnaryCondition<Subject = Anything>
+        of Not<Subject>
+        satisfies Condition<Subject> {
+    shared formal Condition<Subject> inner;
 }
 
-shared class Not(inner) satisfies UnaryCondition {
-    shared actual Condition inner;
+shared class Not<Subject>(inner) satisfies UnaryCondition<Subject> {
+    shared actual Condition<Subject> inner;
 }
 
-shared interface Ordering of Asc | Desc {
-    shared formal Column column;
+shared interface Ordering<out Subject = Anything> of Asc<Subject> | Desc<Subject> {
+    shared formal Column<Subject> column;
 }
 
-shared class Asc(column) satisfies Ordering {
-    shared actual Column column;
+shared class Asc<out Subject = Anything>(column) satisfies Ordering<Subject> {
+    shared actual Column<Subject> column;
 }
 
-shared class Desc(column) satisfies Ordering {
-    shared actual Column column;
+shared class Desc<out Subject = Anything>(column) satisfies Ordering<Subject> {
+    shared actual Column<Subject> column;
 }
 
 shared class SelectQuery(query, params) {
@@ -169,34 +190,34 @@ shared class SelectQuery(query, params) {
     string => "SelectQuery(query=``query``, params=``params``)";
 }
 
-void extractConditionParams(MutableList<Object> result, Condition where) {
+void extractConditionParams<Subject>(MutableList<Object> result, Condition<Subject> where) {
     switch (where) 
-    case (is Equal | LessThan | AtMost | GreaterThan | AtLeast) {
+    case (is Compare<Subject>) {
         result.add(where.rhs.literal);
     }
-    case (is And | Or) {
+    case (is BinaryCondition<Subject>) {
         extractConditionParams(result, where.left);
         extractConditionParams(result, where.right);
     }
-    case (is Not) {
+    case (is UnaryCondition<Subject>) {
         extractConditionParams(result, where.inner);
     }
 }
 
-shared SelectQuery select(
+shared SelectQuery select<Subject>(
     columns,
     from,
     where = null,
     orderBy = {}
 ) {
-    Table columns;
-    Table from;
-    Condition? where;
-    {Ordering*} orderBy;
+    Table<Subject> columns;
+    Table<Subject> from;
+    Condition<Subject>? where;
+    {Ordering<Subject>*} orderBy;
     
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<Object>();
-    value emitter = SqlEmitter(queryBuilder.append);
+    value emitter = SqlEmitter<Subject>(queryBuilder.append);
 
     emitter.select(columns);
     emitter.from(from);
@@ -204,7 +225,7 @@ shared SelectQuery select(
         emitter.where(where);
         extractConditionParams(queryParams, where);
     }
-    if (is {Ordering+} orderBy) {
+    if (is {Ordering<Subject>+} orderBy) {
         emitter.orderBy(orderBy);
     }
     
@@ -218,16 +239,26 @@ shared class Employee(name, age, salary) {
     shared column Float salary;
 }
 
+table
+shared class Company(name) {
+    shared column String name;
+}
+
+shared class Organization(name) {
+    shared column String name;
+}
+
 shared void run() {
     value devs = AliasedTable("devs", `Employee`);
     print(
-        select {
-            columns = devs;
-            from = devs;
-            where = And (
-                GreaterThan(devs.column(`Employee.salary`), Literal(50)),
-                AtMost(devs.column(`Employee.age`), Literal(33))
-            );
+        select<Employee|Company> {
+            devs;
+            from = `Company`;
+            where = 
+                And (
+                    GreaterThan(devs.column(`Employee.salary`), Literal(50)),
+                    AtMost(`Company.name`, Literal(33))
+                );
             orderBy = {
                 Asc(devs.column(`Employee.salary`)),
                 Desc(devs.column(`Employee.age`))
