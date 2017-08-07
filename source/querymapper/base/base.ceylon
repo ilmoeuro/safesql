@@ -16,169 +16,77 @@ import ceylon.collection {
     MutableList,
     ArrayList
 }
-import ceylon.language.meta.declaration {
-    ValueDeclaration,
-    ClassDeclaration
-}
 import ceylon.language.meta.model {
     Class,
     Attribute
 }
 
-"The annotation class for [[column]] annotation"
-shared final annotation class ColumnAnnotation(name = "")
-    satisfies OptionalAnnotation<
-        ColumnAnnotation,
-        ValueDeclaration
-> {
-    shared String name;
-}
-
-"The annotation to mark an attribute as a database column.
+"An aliased database table to be used in queries.
  
- All class attributes that are not annotated as columns are ignored. If you
- specify the `name` parameter, it will be used as the column name, otherwise
- the attribute name will be used as the column name."
-shared annotation ColumnAnnotation column(
-    "The name of the database column corresponding to the annotated attribute.
-     If empty, the attribute name itself is used."
-    String name = ""
-)
-        => ColumnAnnotation(name);
-
-"The annotation class for [[table]] annotation."
-shared final annotation class TableAnnotation(name = "")
-    satisfies OptionalAnnotation<
-        TableAnnotation,
-        ClassDeclaration
-> {
-    shared String name;
-}
-
-"The annotation to mark a class as a database table.
+ All table names are aliased. The aliases are not generated or checked in
+ compile time, so keeping them unique is the responsibility of the developer.
+ Each table is mapped to one or more classes. If you want multiple projections
+ for a table, you can create multiple classes that map to the same table name.
  
- Classes can't be used in queries if not annotated `table`. If you specify
- the `name` parameter, it will be used as the table name, otherwise the
- name of the class itself is used."
-shared annotation TableAnnotation table(
-    "The name of the database table corresponding to the annotated class.
-     If empty, the class name itself is used."
-    String name = ""
-)
-        => TableAnnotation(name);
-
-shared alias Table<out Subject = Anything> => Class<Subject> | AliasedTable<Subject>;
-
-shared alias Column<out Subject = Anything> => BareColumn<Subject> | AliasedColumn<Subject>;
-
-suppressWarnings("unusedDeclaration")
-shared final sealed class BareColumn<out Subject = Anything>(attribute) {
-    shared Attribute<> attribute;
-}
-
-shared BareColumn<Subject> col<Subject>(Attribute<Subject, Anything> attr) {
-    return BareColumn<Subject>(attr);
-}
-
-shared final class AliasedTable<out Subject = Anything>(name, cls) {
+ Typical usage:
+ 
+     value employees = Table(\"employees\", `Employee`);
+     
+     return select<Employee>{
+         employees,
+         from = employees,
+         where = /* query involving employees.column() */
+     };
+ 
+ "
+shared final class Table<out Subject = Anything>(name, cls) {
+    "The name of the alias. **Not** statically checked for collisions."
     shared String name;
+    "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
     shared Class<Subject> cls;
     
-    shared AliasedColumn<Subject> column(
+    "Create a [[Column]] object attached to this table, based on an attribute
+     of the mapped class."
+    shared Column<Subject> column(
+        "The attribute the column maps to. **Must** be annotated with
+         [[querymapper.base::column]]."
         Attribute<Subject, Anything> attribute
     ) {
-        return AliasedColumn(this, attribute);
+        return Column(this, attribute);
     }
 }
 
-shared sealed class AliasedColumn<out Subject = Anything>(table, attribute) {
-    shared AliasedTable<Subject> table;
+"An aliased database column to be used in queries.
+ 
+ All column names are based on [[Table]] aliases - there is no bare columns.
+ The class is [[sealed]], so names can only be created using the
+ [[Table.column]] method.
+ 
+ Typical usage:
+ 
+     value employees = Table(\"employees\", `Employee`);
+     value name = employees.column(`Employee.name`);
+     
+ "
+shared sealed class Column<out Subject = Anything>(table, attribute) {
+    "The table this column belongs to."
+    shared Table<Subject> table;
+    "The attribute that this column is mapped to."
     shared Attribute<> attribute;
 }
 
-shared interface Condition<Subject>
-        of Compare<Subject>
-        | BinaryCondition<Subject>
-        | UnaryCondition<Subject> {
-    
-}
-
-shared final class Literal(literal) {
-    shared Object literal;
-}
-
-shared interface Compare<Subject = Anything>
-        of Equal<Subject>
-        | AtMost<Subject>
-        | LessThan<Subject>
-        | AtLeast<Subject>
-        | GreaterThan<Subject>
-        satisfies Condition<Subject> {
-    shared formal Column<Subject> lhs;
-    shared formal Literal rhs;
-}
-
-shared class Equal<Subject>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
-}
-
-shared class AtMost<Subject>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
-}
-
-shared class LessThan<Subject>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
-}
-
-shared class AtLeast<Subject>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
-}
-
-shared class GreaterThan<Subject> (lhs, rhs) satisfies Compare<Subject>  {
-    shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
-}
-
-shared interface BinaryCondition<Subject = Anything>
-        of And<Subject>
-        | Or<Subject>
-        satisfies Condition<Subject> {
-    shared formal Condition<Subject> left;
-    shared formal Condition<Subject> right;
-}
-
-shared class And<Subject>(left, right) satisfies BinaryCondition<Subject> {
-    shared actual Condition<Subject> left;
-    shared actual Condition<Subject> right;
-}
-
-shared class Or<Subject>(left, right) satisfies BinaryCondition<Subject> {
-    shared actual Condition<Subject> left;
-    shared actual Condition<Subject> right;
-}
-
-shared interface UnaryCondition<Subject = Anything>
-        of Not<Subject>
-        satisfies Condition<Subject> {
-    shared formal Condition<Subject> inner;
-}
-
-shared class Not<Subject>(inner) satisfies UnaryCondition<Subject> {
-    shared actual Condition<Subject> inner;
-}
-
+"An ordering to be used in `ORDER BY` clauses."
 shared interface Ordering<out Subject = Anything> of Asc<Subject> | Desc<Subject> {
+    "The database column to order by."
     shared formal Column<Subject> column;
 }
 
+"Ascending ordering, maps to SQL `ASC` keyword."
 shared class Asc<out Subject = Anything>(column) satisfies Ordering<Subject> {
     shared actual Column<Subject> column;
 }
 
+"Descending ordering, maps to SQL `DESC` keyword."
 shared class Desc<out Subject = Anything>(column) satisfies Ordering<Subject> {
     shared actual Column<Subject> column;
 }
@@ -196,8 +104,9 @@ void extractConditionParams<Subject>(MutableList<Object> result, Condition<Subje
         result.add(where.rhs.literal);
     }
     case (is BinaryCondition<Subject>) {
-        extractConditionParams(result, where.left);
-        extractConditionParams(result, where.right);
+        for (condition in where.conditions) {
+            extractConditionParams(result, condition);
+        }
     }
     case (is UnaryCondition<Subject>) {
         extractConditionParams(result, where.inner);
@@ -217,7 +126,7 @@ shared SelectQuery select<Subject>(
     
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<Object>();
-    value emitter = SqlEmitter<Subject>(queryBuilder.append);
+    value emitter = SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
     emitter.from(from);
@@ -244,21 +153,21 @@ shared class Company(name) {
     shared column String name;
 }
 
+table
 shared class Organization(name) {
     shared column String name;
 }
 
 shared void run() {
-    value devs = AliasedTable("devs", `Employee`);
+    value devs = Table("devs", `Employee`);
     print(
-        select<Employee|Company> {
+        select<Employee> {
             devs;
-            from = `Company`;
-            where = 
-                And (
-                    GreaterThan(devs.column(`Employee.salary`), Literal(50)),
-                    AtMost(`Company.name`, Literal(33))
-                );
+            from = devs;
+            where = And {
+                GreaterThan(devs.column(`Employee.salary`), Literal(50)),
+                AtMost(devs.column(`Employee.age`), Literal(33))
+            };
             orderBy = {
                 Asc(devs.column(`Employee.salary`)),
                 Desc(devs.column(`Employee.age`))

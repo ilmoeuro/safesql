@@ -12,6 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+by("Ilmo Euro <ilmo.euro@gmail.com>")
+license("[ASL 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)")
 module querymapper.base "1.0.0" {
     import ceylon.collection "1.3.2";
 }
