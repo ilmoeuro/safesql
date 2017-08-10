@@ -116,16 +116,16 @@ void extractConditionParams<Subject>(MutableList<Object> result, Condition<Subje
     }
 }
 
-shared SelectQuery select<Subject>(
+shared SelectQuery select<Result, Source>(
     columns,
     from,
     where = null,
     orderBy = {}
-) {
-    Table<Subject> columns;
-    Table<Subject> from;
-    Condition<Subject>? where;
-    {Ordering<Subject>*} orderBy;
+) given Result satisfies Source {
+    Table<Result> columns;
+    Table<Source> from;
+    Condition<Source>? where;
+    {Ordering<Source>*} orderBy;
     
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<Object>();
@@ -137,7 +137,7 @@ shared SelectQuery select<Subject>(
         emitter.where(where);
         extractConditionParams(queryParams, where);
     }
-    if (is {Ordering<Subject>+} orderBy) {
+    if (is {Ordering<Source>+} orderBy) {
         emitter.orderBy(orderBy);
     }
     
@@ -163,13 +163,15 @@ shared class Organization(name) {
 
 shared void run() {
     value devs = Table("devs", `Employee`);
+    value company = Table("company", `Company`);
     print(
-        select<Employee> {
+        select<Employee, Employee|Company> {
             devs;
             from = devs;
             where = And {
                 GreaterThan(devs.column(`Employee.salary`), Literal(50)),
-                AtMost(devs.column(`Employee.age`), Literal(33))
+                AtMost(devs.column(`Employee.age`), Literal(33)),
+                Equal(company.column(`Company.name`), Literal("ACME"))
             };
             orderBy = {
                 Asc(devs.column(`Employee.salary`)),
