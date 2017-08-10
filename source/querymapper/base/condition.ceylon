@@ -13,75 +13,75 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 "A condition used in `WHERE` clauses."
-shared interface Condition<out Subject = Anything>
-        of Compare<Subject>
-        | BinaryCondition<Subject>
-        | UnaryCondition<Subject> {
+shared interface Condition<out Source = Anything>
+        of Compare<Source, Anything>
+        | BinaryCondition<Source>
+        | UnaryCondition<Source> {
     
 }
 
-shared final class Literal<out Subject = Object>(literal)
-        given Subject satisfies Object {
-    shared Subject literal;
+shared interface Compare<out Source=Anything, out Field=Anything>
+        of Equal<Source, Field>
+        | AtMost<Source, Field>
+        | LessThan<Source, Field>
+        | AtLeast<Source, Field>
+        | GreaterThan<Source, Field>
+        satisfies Condition<Source> {
+    shared formal Column<Source> lhs;
+    shared formal Field rhs;
 }
 
-shared interface Compare<out Subject = Anything>
-        of Equal<Subject>
-        | AtMost<Subject>
-        | LessThan<Subject>
-        | AtLeast<Subject>
-        | GreaterThan<Subject>
-        satisfies Condition<Subject> {
-    shared formal Column<Subject> lhs;
-    shared formal Literal<Subject> rhs;
+shared class Equal<out Source=Anything, out Field=Anything>(lhs, rhs)
+        satisfies Compare<Source,Field> {
+    shared actual Column<Source, Field> lhs;
+    shared actual Field rhs;
 }
 
-shared class Equal<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal<Subject> rhs;
+shared class AtMost<out Source=Anything, out Field=Anything>(lhs, rhs)
+        satisfies Compare<Source,Field> {
+    shared actual Column<Source, Field> lhs;
+    shared actual Field rhs;
 }
 
-shared class AtMost<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal<Subject> rhs;
+shared class LessThan<out Source=Anything, out Field=Anything>(lhs, rhs)
+        satisfies Compare<Source,Field> {
+    shared actual Column<Source, Field> lhs;
+    shared actual Field rhs;
 }
 
-shared class LessThan<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal<Subject> rhs;
+shared class AtLeast<out Source=Anything, out Field=Anything>(lhs, rhs)
+        satisfies Compare<Source,Field> {
+    shared actual Column<Source, Field> lhs;
+    shared actual Field rhs;
 }
 
-shared class AtLeast<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
-    shared actual Column<Subject> lhs;
-    shared actual Literal<Subject> rhs;
+shared class GreaterThan<out Source=Anything, out Field=Anything>(lhs, rhs)
+        satisfies Compare<Source,Field> {
+    shared actual Column<Source, Field> lhs;
+    shared actual Field rhs;
 }
 
-shared class GreaterThan<out Subject = Anything> (lhs, rhs) satisfies Compare<Subject>  {
-    shared actual Column<Subject> lhs;
-    shared actual Literal<Subject> rhs;
+shared interface BinaryCondition<out Source = Anything>
+        of And<Source>
+        | Or<Source>
+        satisfies Condition<Source> {
+    shared formal {Condition<Source>+} conditions;
 }
 
-shared interface BinaryCondition<out Subject = Anything>
-        of And<Subject>
-        | Or<Subject>
-        satisfies Condition<Subject> {
-    shared formal {Condition<>+} conditions;
+shared class And<out Source = Anything>(conditions) satisfies BinaryCondition<Source> {
+    shared actual {Condition<Source>+} conditions;
 }
 
-shared class And<out Subject = Anything>(conditions) satisfies BinaryCondition<Subject> {
-    shared actual {Condition<>+} conditions;
+shared class Or<out Source = Anything>(conditions) satisfies BinaryCondition<Source> {
+    shared actual {Condition<Source>+} conditions;
 }
 
-shared class Or<out Subject = Anything>(conditions) satisfies BinaryCondition<Subject> {
-    shared actual {Condition<>+} conditions;
+shared interface UnaryCondition<out Source = Anything>
+        of Not<Source>
+        satisfies Condition<Source> {
+    shared formal Condition<Source> inner;
 }
 
-shared interface UnaryCondition<out Subject = Anything>
-        of Not<Subject>
-        satisfies Condition<Subject> {
-    shared formal Condition<Subject> inner;
-}
-
-shared class Not<out Subject = Anything>(inner) satisfies UnaryCondition<Subject> {
-    shared actual Condition<Subject> inner;
+shared class Not<out Source = Anything>(inner) satisfies UnaryCondition<Source> {
+    shared actual Condition<Source> inner;
 }

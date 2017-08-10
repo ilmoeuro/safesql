@@ -39,18 +39,18 @@ import ceylon.language.meta.model {
      };
  
  "
-shared final class Table<out Subject = Anything>(name, cls) {
+shared final class Table<out Source = Anything>(name, cls) {
     "The name of the alias. **Not** statically checked for collisions."
     shared String name;
     "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
-    shared Class<Subject> cls;
+    shared Class<Source> cls;
     
     "Create a [[Column]] object attached to this table, based on an attribute
      of the mapped class."
-    shared Column<Subject> column(
+    shared Column<Source, Field> column<Field>(
         "The attribute the column maps to. **Must** be annotated with
          [[querymapper.base::column]]."
-        Attribute<Subject, Anything> attribute
+        Attribute<Source, Field> attribute
     ) {
         return Column(this, attribute);
     }
@@ -68,50 +68,48 @@ shared final class Table<out Subject = Anything>(name, cls) {
      value name = employees.column(`Employee.name`);
      
  "
-shared class Column<out Subject = Anything>(table, attribute) {
+shared class Column<out Source = Anything, out Field = Anything>(table, attribute) {
     "The table this column belongs to."
-    shared Table<Subject> table;
+    shared Table<Source> table;
     "The attribute that this column is mapped to."
-    shared Attribute<> attribute;
+    shared Attribute<Nothing, Field> attribute;
 }
 
 "An ordering to be used in `ORDER BY` clauses."
-shared interface Ordering<out Subject = Anything> of Asc<Subject> | Desc<Subject> {
+shared interface Ordering<out Source = Anything> of Asc<Source> | Desc<Source> {
     "The database column to order by."
-    shared formal Column<Subject> column;
+    shared formal Column<Source> column;
 }
 
 "Ascending ordering, maps to SQL `ASC` keyword."
-shared class Asc<out Subject = Anything>(column) satisfies Ordering<Subject> {
-    shared actual Column<Subject> column;
+shared class Asc<out Source = Anything>(column) satisfies Ordering<Source> {
+    shared actual Column<Source> column;
 }
 
 "Descending ordering, maps to SQL `DESC` keyword."
-shared class Desc<out Subject = Anything>(column) satisfies Ordering<Subject> {
-    shared actual Column<Subject> column;
+shared class Desc<out Source = Anything>(column) satisfies Ordering<Source> {
+    shared actual Column<Source> column;
 }
 
 shared class SelectQuery(query, params) {
     shared String query;
-    shared {Object*} params;
+    shared {Anything*} params;
     
     string => "SelectQuery(query=``query``, params=``params``)";
 }
 
-void extractConditionParams<Subject>(MutableList<Object> result, Condition<Subject> where) {
+void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
     switch (where) 
-    case (is Compare<Subject>) {
-        value lit = where.rhs.literal;
-        "Literal has Object lower bound for type parameter"
-        assert(exists lit);
+    case (is Compare<Source>) {
+        value lit = where.rhs;
         result.add(lit);
     }
-    case (is BinaryCondition<Subject>) {
+    case (is BinaryCondition<Source>) {
         for (condition in where.conditions) {
             extractConditionParams(result, condition);
         }
     }
-    case (is UnaryCondition<Subject>) {
+    case (is UnaryCondition<Source>) {
         extractConditionParams(result, where.inner);
     }
 }
@@ -128,7 +126,7 @@ shared SelectQuery select<Result, Source>(
     {Ordering<Source>*} orderBy;
     
     value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<Object>();
+    value queryParams = ArrayList<Anything>();
     value emitter = SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
@@ -169,9 +167,9 @@ shared void run() {
             devs;
             from = devs;
             where = And {
-                GreaterThan(devs.column(`Employee.salary`), Literal(50)),
-                AtMost(devs.column(`Employee.age`), Literal(33)),
-                Equal(company.column(`Company.name`), Literal("ACME"))
+                GreaterThan<Employee,Float>(devs.column(`Employee.salary`), 50.0),
+                AtMost<Employee,Integer>(devs.column(`Employee.age`), 33),
+                Equal<Company,String>(company.column(`Company.name`), "ACME")
             };
             orderBy = {
                 Asc(devs.column(`Employee.salary`)),
