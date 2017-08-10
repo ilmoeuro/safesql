@@ -39,7 +39,7 @@ import ceylon.language.meta.model {
      };
  
  "
-shared final class Table<out Source = Anything>(name, cls) {
+shared final class Table<out Source=Anything>(name, cls) {
     "The name of the alias. **Not** statically checked for collisions."
     shared String name;
     "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
@@ -68,7 +68,7 @@ shared final class Table<out Source = Anything>(name, cls) {
      value name = employees.column(`Employee.name`);
      
  "
-shared class Column<out Source = Anything, out Field = Anything>(table, attribute) {
+shared class Column<out Source=Anything, out Field = Anything>(table, attribute) {
     "The table this column belongs to."
     shared Table<Source> table;
     "The attribute that this column is mapped to."
@@ -76,20 +76,24 @@ shared class Column<out Source = Anything, out Field = Anything>(table, attribut
 }
 
 "An ordering to be used in `ORDER BY` clauses."
-shared interface Ordering<out Source = Anything> of Asc<Source> | Desc<Source> {
+shared interface Ordering<out Source=Anything> of Asc<Source> | Desc<Source> {
     "The database column to order by."
     shared formal Column<Source> column;
 }
 
 "Ascending ordering, maps to SQL `ASC` keyword."
-shared class Asc<out Source = Anything>(column) satisfies Ordering<Source> {
+shared sealed class Asc<out Source=Anything>(column) satisfies Ordering<Source> {
     shared actual Column<Source> column;
 }
 
+shared Asc<Source> asc<Source>(Column<Source> column) => Asc(column);
+
 "Descending ordering, maps to SQL `DESC` keyword."
-shared class Desc<out Source = Anything>(column) satisfies Ordering<Source> {
+shared sealed class Desc<out Source=Anything>(column) satisfies Ordering<Source> {
     shared actual Column<Source> column;
 }
+
+shared Desc<Source> desc<Source>(Column<Source> column) => Desc(column);
 
 shared class SelectQuery(query, params) {
     shared String query;
@@ -166,14 +170,14 @@ shared void run() {
         select<Employee, Employee|Company> {
             devs;
             from = devs;
-            where = And {
-                GreaterThan<Employee,Float>(devs.column(`Employee.salary`), 50.0),
-                AtMost<Employee,Integer>(devs.column(`Employee.age`), 33),
-                Equal<Company,String>(company.column(`Company.name`), "ACME")
+            where = and {
+                greaterThan(devs.column(`Employee.salary`))(50.0),
+                atMost(devs.column(`Employee.age`))(33),
+                equal(company.column(`Company.name`))("ACME")
             };
             orderBy = {
-                Asc(devs.column(`Employee.salary`)),
-                Desc(devs.column(`Employee.age`))
+                asc(devs.column(`Employee.salary`)),
+                desc(devs.column(`Employee.age`))
             };
         }
     );
