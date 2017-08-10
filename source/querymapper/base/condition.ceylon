@@ -12,6 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+"A condition used in `WHERE` clauses."
 shared interface Condition<out Subject = Anything>
         of Compare<Subject>
         | BinaryCondition<Subject>
@@ -19,8 +20,9 @@ shared interface Condition<out Subject = Anything>
     
 }
 
-shared final class Literal(literal) {
-    shared Object literal;
+shared final class Literal<out Subject = Object>(literal)
+        given Subject satisfies Object {
+    shared Subject literal;
 }
 
 shared interface Compare<out Subject = Anything>
@@ -31,32 +33,32 @@ shared interface Compare<out Subject = Anything>
         | GreaterThan<Subject>
         satisfies Condition<Subject> {
     shared formal Column<Subject> lhs;
-    shared formal Literal rhs;
+    shared formal Literal<Subject> rhs;
 }
 
 shared class Equal<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
     shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
+    shared actual Literal<Subject> rhs;
 }
 
 shared class AtMost<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
     shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
+    shared actual Literal<Subject> rhs;
 }
 
 shared class LessThan<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
     shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
+    shared actual Literal<Subject> rhs;
 }
 
 shared class AtLeast<out Subject = Anything>(lhs, rhs) satisfies Compare<Subject> {
     shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
+    shared actual Literal<Subject> rhs;
 }
 
 shared class GreaterThan<out Subject = Anything> (lhs, rhs) satisfies Compare<Subject>  {
     shared actual Column<Subject> lhs;
-    shared actual Literal rhs;
+    shared actual Literal<Subject> rhs;
 }
 
 shared interface BinaryCondition<out Subject = Anything>

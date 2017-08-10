@@ -68,7 +68,7 @@ shared final class Table<out Subject = Anything>(name, cls) {
      value name = employees.column(`Employee.name`);
      
  "
-shared sealed class Column<out Subject = Anything>(table, attribute) {
+shared class Column<out Subject = Anything>(table, attribute) {
     "The table this column belongs to."
     shared Table<Subject> table;
     "The attribute that this column is mapped to."
@@ -101,7 +101,10 @@ shared class SelectQuery(query, params) {
 void extractConditionParams<Subject>(MutableList<Object> result, Condition<Subject> where) {
     switch (where) 
     case (is Compare<Subject>) {
-        result.add(where.rhs.literal);
+        value lit = where.rhs.literal;
+        "Literal has Object lower bound for type parameter"
+        assert(exists lit);
+        result.add(lit);
     }
     case (is BinaryCondition<Subject>) {
         for (condition in where.conditions) {
