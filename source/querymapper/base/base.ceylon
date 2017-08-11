@@ -95,13 +95,6 @@ shared sealed class Desc<out Source=Anything>(column) satisfies Ordering<Source>
 
 shared Desc<Source> desc<Source>(Column<Source> column) => Desc(column);
 
-shared class SelectQuery(query, params) {
-    shared String query;
-    shared {Anything*} params;
-    
-    string => "SelectQuery(query=``query``, params=``params``)";
-}
-
 void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
     switch (where) 
     case (is Compare<Source>) {
@@ -118,43 +111,101 @@ void extractConditionParams<Source>(MutableList<Anything> result, Condition<Sour
     }
 }
 
-shared SelectQuery select<Result, Source>(
+shared sealed class From<Source>(source, joins = {}) {
+    Table<Source> source;
+    {Join<Source>*} joins;
+    
+    shared Where<Source> where(condition) {
+        Condition<Source>? condition;
+        return Where(source, joins, condition);
+    }
+}
+
+shared From<Source> from<Source>(
+    Table<Source> source,
+    {Join<Source>*} joins = {}
+) => From(source, joins);
+
+shared sealed class Where<Source>(source, joins, condition) {
+    Table<Source> source;
+    {Join<Source>*} joins;
+    Condition<Source>? condition;
+    
+    shared OrderBy<Source> orderBy(ordering) {
+        {Ordering<Source>+} ordering;
+        return OrderBy(source, joins, condition, ordering);
+    }
+
+    shared SelectQuery select<Result>(Table<Result> columns)
+            given Result satisfies Source {
+        return selectQuery(columns, source, {}, condition);
+    }
+}
+
+shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
+    Table<Source> source;
+    {Join<Source>*} joins;
+    Condition<Source>? condition;
+    {Ordering<Source>+} ordering;
+    
+    shared SelectQuery select<Result>(Table<Result> columns)
+            given Result satisfies Source {
+        return selectQuery(columns, source, joins, condition, ordering);
+    }
+}
+
+shared class SelectQuery(query, params) {
+    shared String query;
+    shared {Anything*} params;
+    
+    string => "SelectQuery(query=``query``, params=``params``)";
+}
+
+SelectQuery selectQuery<Result, Source>(
     columns,
-    from,
-    where = null,
-    orderBy = {}
+    source,
+    joins,
+    condition = null,
+    ordering = {}
 ) given Result satisfies Source {
     Table<Result> columns;
-    Table<Source> from;
-    Condition<Source>? where;
-    {Ordering<Source>*} orderBy;
+    Table<Source> source;
+    {Join<Source>*} joins;
+    Condition<Source>? condition;
+    {Ordering<Source>*} ordering;
     
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<Anything>();
     value emitter = SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
-    emitter.from(from);
-    if (exists where) {
-        emitter.where(where);
-        extractConditionParams(queryParams, where);
+    emitter.from(source);
+    if (is {Join<Source>+} joins) {
+        emitter.joins(joins);
     }
-    if (is {Ordering<Source>+} orderBy) {
-        emitter.orderBy(orderBy);
+    if (exists condition) {
+        emitter.where(condition);
+        extractConditionParams(queryParams, condition);
+    }
+    if (is {Ordering<Source>+} ordering) {
+        emitter.orderBy(ordering);
     }
     
     return SelectQuery(queryBuilder.string, queryParams);
 }
 
 table
-shared class Employee(name, age, salary) {
+shared class Employee(id, name, age, salary, company) {
+    shared column Integer id;
     shared column String name;
     shared column Integer age;
     shared column Float salary;
+    shared column Integer company;
 }
 
 table
-shared class Company(name) {
+shared class Company(id, name) {
+    shared column Integer id;
     shared column String name;
 }
 
@@ -167,18 +218,25 @@ shared void run() {
     value devs = Table("devs", `Employee`);
     value company = Table("company", `Company`);
     print(
-        select<Employee, Employee|Company> {
+        from {
             devs;
-            from = devs;
-            where = and {
-                greaterThan(devs.column(`Employee.salary`))(50.0),
-                atMost(devs.column(`Employee.age`))(33),
-                equal(company.column(`Company.name`))("ACME")
-            };
-            orderBy = {
-                asc(devs.column(`Employee.salary`)),
-                desc(devs.column(`Employee.age`))
-            };
+            leftJoin<Company|Employee, Integer>(
+                company,
+                devs.column(`Employee.company`),
+                company.column(`Company.id`)
+            )
         }
+        .where (
+            and {
+                greaterThan(devs.column(`Employee.age`))(50),
+                equal(company.column(`Company.name`))("ACME")
+            }
+        )
+        .orderBy {
+            asc(
+                devs.column(`Employee.salary`)
+            )
+        }
+        .select(devs)
     );
 }

@@ -71,10 +71,6 @@ class SqlEmitter(Anything(String) emit) {
             bareColumnName(attribute);
         }
     }
-    
-    void tableList(Table<> table) {
-        tableName(table);
-    }
 
     void condition(Condition<> where) {
         switch (where) 
@@ -117,14 +113,34 @@ class SqlEmitter(Anything(String) emit) {
         }
     }
 
-    shared void select(Table<> cls) {
+    shared void select(Table<> table) {
         emit("SELECT ");
-        columnList(cls);
+        columnList(table);
     }
     
-    shared void from(Table<> cls) {
+    shared void from(Table<> table) {
         emit(" FROM ");
-        tableList(cls);
+        tableName(table);
+    }
+    
+    shared void joins({Join<>+} joins) {
+        for (i -> join in joins.indexed) {
+            emit(" ");
+            emit(
+                switch (join)
+                case (is InnerJoin<>)       "INNER JOIN "
+                case (is LeftJoin<>)        "LEFT JOIN "
+                case (is RightJoin<>)       "RIGHT JOIN "
+                case (is CrossJoin<>)       "CROSS JOIN "
+            );
+            tableName(join.table);
+            if (is KeyedJoin<> join) {
+                emit(" ON ");
+                columnName(join.leftKey);
+                emit("=");
+                columnName(join.rightKey);
+            }
+        }
     }
     
     shared void where(Condition<> where) {
