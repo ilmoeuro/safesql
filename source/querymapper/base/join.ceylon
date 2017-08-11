@@ -1,6 +1,3 @@
-import ceylon.language.meta.model {
-    Type
-}
 /* Copyright 2017 Ilmo Euro
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +23,8 @@ shared interface KeyedJoin<out Source=Anything, out Field=Anything>
         | LeftJoin<Source, Field>
         | RightJoin<Source, Field>
         satisfies Join<Source> {
-    shared formal Column<Source, Field> leftKey;
-    shared formal Column<Source, Field> rightKey;
+    shared formal CovariantColumn<Source, Field> leftKey;
+    shared formal CovariantColumn<Source, Field> rightKey;
 }
 
 shared sealed class InnerJoin<out Source=Anything, out Field=Anything>(
@@ -36,15 +33,15 @@ shared sealed class InnerJoin<out Source=Anything, out Field=Anything>(
     rightKey
 ) satisfies KeyedJoin<Source, Field> {
     shared actual Table<Source> table;
-    shared actual Column<Source, Field> leftKey;
-    shared actual Column<Source, Field> rightKey;
+    shared actual CovariantColumn<Source, Field> leftKey;
+    shared actual CovariantColumn<Source, Field> rightKey;
 }
 
 shared InnerJoin<Source> innerJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
     Column<Source, Field> leftKey;
     Column<Source, Field> rightKey;
-    return InnerJoin(table, leftKey, rightKey);
+    return InnerJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
 }
 
 shared sealed class LeftJoin<out Source=Anything, out Field=Anything>(
@@ -53,15 +50,15 @@ shared sealed class LeftJoin<out Source=Anything, out Field=Anything>(
     rightKey
 ) satisfies KeyedJoin<Source, Field> {
     shared actual Table<Source> table;
-    shared actual Column<Source, Field> leftKey;
-    shared actual Column<Source, Field> rightKey;
+    shared actual CovariantColumn<Source, Field> leftKey;
+    shared actual CovariantColumn<Source, Field> rightKey;
 }
 
 shared LeftJoin<Source> leftJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
     Column<Source, Field> leftKey;
     Column<Source, Field> rightKey;
-    return LeftJoin(table, leftKey, rightKey);
+    return LeftJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
 }
 
 shared sealed class RightJoin<out Source=Anything, out Field=Anything>(
@@ -70,15 +67,15 @@ shared sealed class RightJoin<out Source=Anything, out Field=Anything>(
     rightKey
 ) satisfies KeyedJoin<Source, Field> {
     shared actual Table<Source> table;
-    shared actual Column<Source, Field> leftKey;
-    shared actual Column<Source, Field> rightKey;
+    shared actual CovariantColumn<Source, Field> leftKey;
+    shared actual CovariantColumn<Source, Field> rightKey;
 }
 
 shared RightJoin<Source> rightJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
     Column<Source, Field> leftKey;
     Column<Source, Field> rightKey;
-    return RightJoin(table, leftKey, rightKey);
+    return RightJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
 }
 
 shared sealed class CrossJoin<out Source=Anything>(table)

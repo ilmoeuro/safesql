@@ -27,68 +27,68 @@ shared interface Compare<out Source=Anything, out Field=Anything>
         | AtLeast<Source, Field>
         | GreaterThan<Source, Field>
         satisfies Condition<Source> {
-    shared formal Column<Source> lhs;
+    shared formal CovariantColumn<Source> lhs;
     shared formal Field rhs;
 }
 
 shared sealed class Equal<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
-    shared actual Column<Source, Field> lhs;
+    shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared Equal<Source, Field> equal<Source, Field>
-        (Column<Source, Field> lhs)
-        (Field rhs) {
-    return Equal(lhs, rhs);
+shared Equal<Source, Field> equal<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return Equal(CovariantColumn(lhs), rhs);
 }
 
 shared sealed class AtMost<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
-    shared actual Column<Source, Field> lhs;
+    shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared AtMost<Source, Field> atMost<Source, Field>
-        (Column<Source, Field> lhs)
-        (Field rhs) {
-    return AtMost(lhs, rhs);
+shared AtMost<Source, Field> atMost<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return AtMost(CovariantColumn(lhs), rhs);
 }
 
 shared class LessThan<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
-    shared actual Column<Source, Field> lhs;
+    shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared LessThan<Source, Field> lessThan<Source, Field>
-        (Column<Source, Field> lhs)
-        (Field rhs) {
-    return LessThan(lhs, rhs);
+shared LessThan<Source, Field> lessThan<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return LessThan(CovariantColumn(lhs), rhs);
 }
 
 shared class AtLeast<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
-    shared actual Column<Source, Field> lhs;
+    shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared AtLeast<Source, Field> atLeast<Source, Field>
-        (Column<Source, Field> lhs)
-        (Field rhs) {
-    return AtLeast(lhs, rhs);
+shared AtLeast<Source, Field> atLeast<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return AtLeast(CovariantColumn(lhs), rhs);
 }
 
 shared class GreaterThan<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
-    shared actual Column<Source, Field> lhs;
+    shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared GreaterThan<Source, Field> greaterThan<Source, Field>
-        (Column<Source, Field> lhs)
-        (Field rhs) {
-    return GreaterThan(lhs, rhs);
+shared GreaterThan<Source, Field> greaterThan<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return GreaterThan(CovariantColumn(lhs), rhs);
 }
 
 shared interface BinaryCondition<out Source = Anything>

@@ -45,7 +45,7 @@ shared final class Table<out Source=Anything>(name, cls) {
     "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
     shared Class<Source> cls;
     
-    "Create a [[Column]] object attached to this table, based on an attribute
+    "Create a [[CovariantColumn]] object attached to this table, based on an attribute
      of the mapped class."
     shared Column<Source, Field> column<Field>(
         "The attribute the column maps to. **Must** be annotated with
@@ -68,32 +68,43 @@ shared final class Table<out Source=Anything>(name, cls) {
      value name = employees.column(`Employee.name`);
      
  "
-shared class Column<out Source=Anything, out Field = Anything>(table, attribute) {
+shared sealed class Column<out Source=Anything, Field = Anything>(table, attribute) {
     "The table this column belongs to."
     shared Table<Source> table;
     "The attribute that this column is mapped to."
     shared Attribute<Nothing, Field> attribute;
 }
 
+shared sealed class CovariantColumn<out Source=Anything, out Field = Anything>(column) {
+    Column<Source, Field> column;
+    "The table this column belongs to."
+    shared Table<Source> table = column.table;
+    "The attribute that this column is mapped to."
+    shared Attribute<Nothing, Field> attribute = column.attribute;
+}
+
+
 "An ordering to be used in `ORDER BY` clauses."
 shared interface Ordering<out Source=Anything> of Asc<Source> | Desc<Source> {
     "The database column to order by."
-    shared formal Column<Source> column;
+    shared formal CovariantColumn<Source> column;
 }
 
 "Ascending ordering, maps to SQL `ASC` keyword."
 shared sealed class Asc<out Source=Anything>(column) satisfies Ordering<Source> {
-    shared actual Column<Source> column;
+    shared actual CovariantColumn<Source> column;
 }
 
-shared Asc<Source> asc<Source>(Column<Source> column) => Asc(column);
+shared Asc<Source> asc<Source, Field>(Column<Source, Field> column) =>
+        Asc(CovariantColumn(column));
 
 "Descending ordering, maps to SQL `DESC` keyword."
 shared sealed class Desc<out Source=Anything>(column) satisfies Ordering<Source> {
-    shared actual Column<Source> column;
+    shared actual CovariantColumn<Source> column;
 }
 
-shared Desc<Source> desc<Source>(Column<Source> column) => Desc(column);
+shared Desc<Source> desc<Source, Field>(Column<Source, Field> column) =>
+        Desc(CovariantColumn(column));
 
 void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
     switch (where) 
@@ -220,7 +231,7 @@ shared void run() {
     print(
         from {
             devs;
-            leftJoin<Company|Employee, Integer>(
+            leftJoin(
                 company,
                 devs.column(`Employee.company`),
                 company.column(`Company.id`)
@@ -228,8 +239,8 @@ shared void run() {
         }
         .where (
             and {
-                greaterThan(devs.column(`Employee.age`))(50),
-                equal(company.column(`Company.name`))("ACME")
+                greaterThan(devs.column(`Employee.age`), 50),
+                equal(company.column(`Company.name`), "ACME")
             }
         )
         .orderBy {

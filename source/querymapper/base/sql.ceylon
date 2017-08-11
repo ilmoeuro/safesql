@@ -31,7 +31,7 @@ class SqlEmitter(Anything(String) emit) {
         emit("\"");
     }
 
-    void columnName(Column<> column) {
+    void columnName(CovariantColumn<> column) {
         emit("\"");
         emit(column.table.name);
         emit("\".");
