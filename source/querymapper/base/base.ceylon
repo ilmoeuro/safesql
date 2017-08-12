@@ -32,11 +32,9 @@ import ceylon.language.meta.model {
  
      value employees = Table(\"employees\", `Employee`);
      
-     return select<Employee>{
-         employees,
-         from = employees,
-         where = /* query involving employees.column() */
-     };
+     from(employees)
+     .where(/* a condition involving employees */)
+     .select(employees);
  
  "
 shared final class Table<out Source=Anything>(name, cls) {
@@ -45,7 +43,7 @@ shared final class Table<out Source=Anything>(name, cls) {
     "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
     shared Class<Source> cls;
     
-    "Create a [[CovariantColumn]] object attached to this table, based on an attribute
+    "Create a [[Column]] object attached to this table, based on an attribute
      of the mapped class."
     shared Column<Source, Field> column<Field>(
         "The attribute the column maps to. **Must** be annotated with
@@ -244,9 +242,7 @@ shared void run() {
             }
         )
         .orderBy {
-            asc(
-                devs.column(`Employee.salary`)
-            )
+            asc(devs.column(`Employee.salary`))
         }
         .select(devs)
     );
