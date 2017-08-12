@@ -24,6 +24,7 @@ abstract class SqlEmitter(Anything(String) emit) {
     void bareColumnName(Attribute<> attribute) {
         value decl = attribute.declaration;
         value annotations = decl.annotations<ColumnAnnotation>();
+        "Column names must be annotated with querymapper.base::column"
         assert(exists annotation = annotations.first);
         startIdentifier();
         if (annotation.name != "") {
@@ -45,6 +46,7 @@ abstract class SqlEmitter(Anything(String) emit) {
     void bareTableName(Class<> table) {
         value decl = table.declaration;
         value annotations = decl.annotations<TableAnnotation>();
+        "Table names must be annotated with querymapper.base::table"
         assert(exists annotation = annotations.first);
         startIdentifier();
         if (annotation.name != "") {

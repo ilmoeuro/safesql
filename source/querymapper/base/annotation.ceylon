@@ -18,6 +18,7 @@ import ceylon.language.meta.declaration {
 }
 
 "The annotation class for [[column]] annotation"
+see(`function column`)
 shared final annotation class ColumnAnnotation(name = "")
     satisfies OptionalAnnotation<
         ColumnAnnotation,
@@ -39,6 +40,7 @@ shared annotation ColumnAnnotation column(
         => ColumnAnnotation(name);
 
 "The annotation class for [[table]] annotation."
+see(`function table`)
 shared final annotation class TableAnnotation(name = "")
     satisfies OptionalAnnotation<
         TableAnnotation,

@@ -43,7 +43,7 @@ shared final class Table<out Source=Anything>(name, cls) {
     "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
     shared Class<Source> cls;
     
-    "Create a [[Column]] object attached to this table, based on an attribute
+    "The [[Column]] object attached to this table, mapped to an attribute
      of the mapped class."
     shared Column<Source, Field> column<Field>(
         "The attribute the column maps to. **Must** be annotated with
