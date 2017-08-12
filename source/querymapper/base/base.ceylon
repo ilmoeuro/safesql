@@ -162,7 +162,7 @@ SelectQuery selectQuery<Result, Source>(
     
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<Anything>();
-    value emitter = SqlEmitter(queryBuilder.append);
+    value emitter = PgH2SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
     emitter.from(source);

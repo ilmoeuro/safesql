@@ -17,24 +17,28 @@ import ceylon.language.meta.model {
     Attribute
 }
 
-class SqlEmitter(Anything(String) emit) {
+abstract class SqlEmitter(Anything(String) emit) {
+    shared formal void startIdentifier();
+    shared formal void endIdentifier();
+    
     void bareColumnName(Attribute<> attribute) {
         value decl = attribute.declaration;
         value annotations = decl.annotations<ColumnAnnotation>();
         assert(exists annotation = annotations.first);
-        emit("\"");
+        startIdentifier();
         if (annotation.name != "") {
             emit(annotation.name);
         } else {
             emit(decl.name);
         }
-        emit("\"");
+        endIdentifier();
     }
 
     void columnName(CovariantColumn<> column) {
-        emit("\"");
+        startIdentifier();
         emit(column.table.name);
-        emit("\".");
+        endIdentifier();
+        emit(".");
         bareColumnName(column.attribute);
     }
 
@@ -42,20 +46,21 @@ class SqlEmitter(Anything(String) emit) {
         value decl = table.declaration;
         value annotations = decl.annotations<TableAnnotation>();
         assert(exists annotation = annotations.first);
-        emit("\"");
+        startIdentifier();
         if (annotation.name != "") {
             emit(annotation.name);
         } else {
             emit(decl.name);
         }
-        emit("\"");
+        endIdentifier();
     }
     
     void tableName(Table<> table) {
         bareTableName(table.cls);
-        emit(" AS \"");
+        emit(" AS ");
+        startIdentifier();
         emit(table.name);
-        emit("\"");
+        endIdentifier();
     }
     
     void columnList(Table<> table) {
@@ -65,9 +70,10 @@ class SqlEmitter(Anything(String) emit) {
                 emit(",");
             }
 
-            emit("\"");
+            startIdentifier();
             emit(table.name);
-            emit("\".");
+            endIdentifier();
+            emit(".");
             bareColumnName(attribute);
         }
     }
@@ -168,5 +174,15 @@ class SqlEmitter(Anything(String) emit) {
                 emit(" DESC");
             }
         }
+    }
+}
+
+class PgH2SqlEmitter(Anything(String) emit) extends SqlEmitter(emit) {
+    shared actual void endIdentifier() {
+        emit("\"");
+    }
+
+    shared actual void startIdentifier() {
+        emit("\"");
     }
 }
