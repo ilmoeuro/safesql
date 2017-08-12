@@ -20,7 +20,46 @@ shared interface Condition<out Source = Anything>
     
 }
 
-shared interface Compare<out Source=Anything, out Field=Anything>
+shared Condition<Source> equal<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return Equal(CovariantColumn(lhs), rhs);
+}
+
+shared Condition<Source> atMost<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return AtMost(CovariantColumn(lhs), rhs);
+}
+
+shared Condition<Source> lessThan<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return LessThan(CovariantColumn(lhs), rhs);
+}
+
+shared Condition<Source> atLeast<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return AtLeast(CovariantColumn(lhs), rhs);
+}
+
+shared Condition<Source> greaterThan<Source, Field>(lhs, rhs) {
+    Column<Source, Field> lhs;
+    Field rhs;
+    return GreaterThan(CovariantColumn(lhs), rhs);
+}
+
+shared Condition<Source> and<Source>({Condition<Source>+} conditions) =>
+        And(conditions);
+
+shared Condition<Source> or<Source>({Condition<Source>+} conditions) =>
+        Or(conditions);
+
+shared Condition<Source> not<Source>(Condition<Source> inner) =>
+        Not(inner);
+
+interface Compare<out Source=Anything, out Field=Anything>
         of Equal<Source, Field>
         | AtMost<Source, Field>
         | LessThan<Source, Field>
@@ -31,96 +70,57 @@ shared interface Compare<out Source=Anything, out Field=Anything>
     shared formal Field rhs;
 }
 
-shared sealed class Equal<out Source=Anything, out Field=Anything>(lhs, rhs)
+class Equal<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared Equal<Source, Field> equal<Source, Field>(lhs, rhs) {
-    Column<Source, Field> lhs;
-    Field rhs;
-    return Equal(CovariantColumn(lhs), rhs);
-}
-
-shared sealed class AtMost<out Source=Anything, out Field=Anything>(lhs, rhs)
+class AtMost<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared AtMost<Source, Field> atMost<Source, Field>(lhs, rhs) {
-    Column<Source, Field> lhs;
-    Field rhs;
-    return AtMost(CovariantColumn(lhs), rhs);
-}
-
-shared class LessThan<out Source=Anything, out Field=Anything>(lhs, rhs)
+class LessThan<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared LessThan<Source, Field> lessThan<Source, Field>(lhs, rhs) {
-    Column<Source, Field> lhs;
-    Field rhs;
-    return LessThan(CovariantColumn(lhs), rhs);
-}
-
-shared class AtLeast<out Source=Anything, out Field=Anything>(lhs, rhs)
+class AtLeast<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared AtLeast<Source, Field> atLeast<Source, Field>(lhs, rhs) {
-    Column<Source, Field> lhs;
-    Field rhs;
-    return AtLeast(CovariantColumn(lhs), rhs);
-}
-
-shared class GreaterThan<out Source=Anything, out Field=Anything>(lhs, rhs)
+class GreaterThan<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
     shared actual Field rhs;
 }
 
-shared GreaterThan<Source, Field> greaterThan<Source, Field>(lhs, rhs) {
-    Column<Source, Field> lhs;
-    Field rhs;
-    return GreaterThan(CovariantColumn(lhs), rhs);
-}
-
-shared interface BinaryCondition<out Source = Anything>
+interface BinaryCondition<out Source = Anything>
         of And<Source>
         | Or<Source>
         satisfies Condition<Source> {
     shared formal {Condition<Source>+} conditions;
 }
 
-shared sealed class And<out Source = Anything>(conditions) satisfies BinaryCondition<Source> {
+class And<out Source = Anything>(conditions) satisfies BinaryCondition<Source> {
     shared actual {Condition<Source>+} conditions;
 }
 
-shared And<Source> and<Source>({Condition<Source>+} conditions) =>
-        And(conditions);
-
-shared sealed class Or<out Source = Anything>(conditions) satisfies BinaryCondition<Source> {
+class Or<out Source = Anything>(conditions) satisfies BinaryCondition<Source> {
     shared actual {Condition<Source>+} conditions;
 }
 
-shared Or<Source> or<Source>({Condition<Source>+} conditions) =>
-        Or(conditions);
-
-shared interface UnaryCondition<out Source = Anything>
+interface UnaryCondition<out Source = Anything>
         of Not<Source>
         satisfies Condition<Source> {
     shared formal Condition<Source> inner;
 }
 
-shared class Not<out Source = Anything>(inner) satisfies UnaryCondition<Source> {
+class Not<out Source = Anything>(inner) satisfies UnaryCondition<Source> {
     shared actual Condition<Source> inner;
 }
-
-shared Not<Source> not<Source>(Condition<Source> inner) =>
-        Not(inner);

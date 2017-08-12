@@ -73,52 +73,10 @@ shared sealed class Column<out Source=Anything, Field = Anything>(table, attribu
     shared Attribute<Nothing, Field> attribute;
 }
 
-shared sealed class CovariantColumn<out Source=Anything, out Field = Anything>(column) {
-    Column<Source, Field> column;
-    "The table this column belongs to."
-    shared Table<Source> table = column.table;
-    "The attribute that this column is mapped to."
-    shared Attribute<Nothing, Field> attribute = column.attribute;
-}
-
-
-"An ordering to be used in `ORDER BY` clauses."
-shared interface Ordering<out Source=Anything> of Asc<Source> | Desc<Source> {
-    "The database column to order by."
-    shared formal CovariantColumn<Source> column;
-}
-
-"Ascending ordering, maps to SQL `ASC` keyword."
-shared sealed class Asc<out Source=Anything>(column) satisfies Ordering<Source> {
-    shared actual CovariantColumn<Source> column;
-}
-
-shared Asc<Source> asc<Source, Field>(Column<Source, Field> column) =>
-        Asc(CovariantColumn(column));
-
-"Descending ordering, maps to SQL `DESC` keyword."
-shared sealed class Desc<out Source=Anything>(column) satisfies Ordering<Source> {
-    shared actual CovariantColumn<Source> column;
-}
-
-shared Desc<Source> desc<Source, Field>(Column<Source, Field> column) =>
-        Desc(CovariantColumn(column));
-
-void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
-    switch (where) 
-    case (is Compare<Source>) {
-        value lit = where.rhs;
-        result.add(lit);
-    }
-    case (is BinaryCondition<Source>) {
-        for (condition in where.conditions) {
-            extractConditionParams(result, condition);
-        }
-    }
-    case (is UnaryCondition<Source>) {
-        extractConditionParams(result, where.inner);
-    }
-}
+shared From<Source> from<Source>(
+    Table<Source> source,
+    {Join<Source>*} joins = {}
+) => From(source, joins);
 
 shared sealed class From<Source>(source, joins = {}) {
     Table<Source> source;
@@ -129,11 +87,6 @@ shared sealed class From<Source>(source, joins = {}) {
         return Where(source, joins, condition);
     }
 }
-
-shared From<Source> from<Source>(
-    Table<Source> source,
-    {Join<Source>*} joins = {}
-) => From(source, joins);
 
 shared sealed class Where<Source>(source, joins, condition) {
     Table<Source> source;
@@ -170,6 +123,30 @@ shared class SelectQuery(query, params) {
     string => "SelectQuery(query=``query``, params=``params``)";
 }
 
+class CovariantColumn<out Source=Anything, out Field = Anything>(column) {
+    Column<Source, Field> column;
+    "The table this column belongs to."
+    shared Table<Source> table = column.table;
+    "The attribute that this column is mapped to."
+    shared Attribute<Nothing, Field> attribute = column.attribute;
+}
+
+void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
+    switch (where) 
+    case (is Compare<Source>) {
+        value lit = where.rhs;
+        result.add(lit);
+    }
+    case (is BinaryCondition<Source>) {
+        for (condition in where.conditions) {
+            extractConditionParams(result, condition);
+        }
+    }
+    case (is UnaryCondition<Source>) {
+        extractConditionParams(result, where.inner);
+    }
+}
+
 SelectQuery selectQuery<Result, Source>(
     columns,
     source,
@@ -201,49 +178,4 @@ SelectQuery selectQuery<Result, Source>(
     }
     
     return SelectQuery(queryBuilder.string, queryParams);
-}
-
-table
-shared class Employee(id, name, age, salary, company) {
-    shared column Integer id;
-    shared column String name;
-    shared column Integer age;
-    shared column Float salary;
-    shared column Integer company;
-}
-
-table
-shared class Company(id, name) {
-    shared column Integer id;
-    shared column String name;
-}
-
-table
-shared class Organization(name) {
-    shared column String name;
-}
-
-shared void run() {
-    value devs = Table("devs", `Employee`);
-    value company = Table("company", `Company`);
-    print(
-        from {
-            devs;
-            leftJoin(
-                company,
-                devs.column(`Employee.company`),
-                company.column(`Company.id`)
-            )
-        }
-        .where (
-            and {
-                greaterThan(devs.column(`Employee.age`), 50),
-                equal(company.column(`Company.name`), "ACME")
-            }
-        )
-        .orderBy {
-            asc(devs.column(`Employee.salary`))
-        }
-        .select(devs)
-    );
 }

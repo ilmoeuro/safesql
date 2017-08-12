@@ -156,7 +156,11 @@ class SqlEmitter(Anything(String) emit) {
                 emit(",");
             }
             
-            columnName(ordering.column);
+            switch (ordering)
+            case (is ColumnOrdering<>) {
+                columnName(ordering.column);
+            }
+
             if (is Asc<> ordering) {
                 emit(" ASC");
             }

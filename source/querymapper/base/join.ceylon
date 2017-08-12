@@ -18,7 +18,31 @@ shared interface Join<out Source=Anything>
     shared formal Table<Source> table;
 }
 
-shared interface KeyedJoin<out Source=Anything, out Field=Anything>
+shared Join<Source> innerJoin<Source, Field>(table, leftKey, rightKey) {
+    Table<Source> table;
+    Column<Source, Field> leftKey;
+    Column<Source, Field> rightKey;
+    return InnerJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
+}
+
+shared Join<Source> leftJoin<Source, Field>(table, leftKey, rightKey) {
+    Table<Source> table;
+    Column<Source, Field> leftKey;
+    Column<Source, Field> rightKey;
+    return LeftJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
+}
+
+shared Join<Source> rightJoin<Source, Field>(table, leftKey, rightKey) {
+    Table<Source> table;
+    Column<Source, Field> leftKey;
+    Column<Source, Field> rightKey;
+    return RightJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
+}
+
+shared Join<Source> crossJoin<Source>(Table<Source> table) =>
+        CrossJoin(table);
+
+interface KeyedJoin<out Source=Anything, out Field=Anything>
         of InnerJoin<Source, Field>
         | LeftJoin<Source, Field>
         | RightJoin<Source, Field>
@@ -27,7 +51,7 @@ shared interface KeyedJoin<out Source=Anything, out Field=Anything>
     shared formal CovariantColumn<Source, Field> rightKey;
 }
 
-shared sealed class InnerJoin<out Source=Anything, out Field=Anything>(
+class InnerJoin<out Source=Anything, out Field=Anything>(
     table,
     leftKey,
     rightKey
@@ -37,14 +61,7 @@ shared sealed class InnerJoin<out Source=Anything, out Field=Anything>(
     shared actual CovariantColumn<Source, Field> rightKey;
 }
 
-shared InnerJoin<Source> innerJoin<Source, Field>(table, leftKey, rightKey) {
-    Table<Source> table;
-    Column<Source, Field> leftKey;
-    Column<Source, Field> rightKey;
-    return InnerJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
-}
-
-shared sealed class LeftJoin<out Source=Anything, out Field=Anything>(
+class LeftJoin<out Source=Anything, out Field=Anything>(
     table,
     leftKey,
     rightKey
@@ -54,14 +71,7 @@ shared sealed class LeftJoin<out Source=Anything, out Field=Anything>(
     shared actual CovariantColumn<Source, Field> rightKey;
 }
 
-shared LeftJoin<Source> leftJoin<Source, Field>(table, leftKey, rightKey) {
-    Table<Source> table;
-    Column<Source, Field> leftKey;
-    Column<Source, Field> rightKey;
-    return LeftJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
-}
-
-shared sealed class RightJoin<out Source=Anything, out Field=Anything>(
+class RightJoin<out Source=Anything, out Field=Anything>(
     table,
     leftKey,
     rightKey
@@ -71,17 +81,7 @@ shared sealed class RightJoin<out Source=Anything, out Field=Anything>(
     shared actual CovariantColumn<Source, Field> rightKey;
 }
 
-shared RightJoin<Source> rightJoin<Source, Field>(table, leftKey, rightKey) {
-    Table<Source> table;
-    Column<Source, Field> leftKey;
-    Column<Source, Field> rightKey;
-    return RightJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
-}
-
-shared sealed class CrossJoin<out Source=Anything>(table)
+class CrossJoin<out Source=Anything>(table)
         satisfies Join<Source> {
     shared actual Table<Source> table;
 }
-
-shared CrossJoin<Source> crossJoin<Source>(Table<Source> table) =>
-        CrossJoin(table);
