@@ -20,7 +20,7 @@ shared interface Condition<out Source = Anything>
     
 }
 
-shared Condition<Source> equal<Source, Field>(lhs, rhs) {
+shared Condition<Source> _equal<Source, Field>(lhs, rhs) {
     Column<Source, Field> lhs;
     Field rhs;
     return Equal(CovariantColumn(lhs), rhs);
@@ -50,13 +50,13 @@ shared Condition<Source> greaterThan<Source, Field>(lhs, rhs) {
     return GreaterThan(CovariantColumn(lhs), rhs);
 }
 
-shared Condition<Source> and<Source>({Condition<Source>+} conditions) =>
+shared Condition<Source> _and<Source>({Condition<Source>+} conditions) =>
         And(conditions);
 
-shared Condition<Source> or<Source>({Condition<Source>+} conditions) =>
+shared Condition<Source> _or<Source>({Condition<Source>+} conditions) =>
         Or(conditions);
 
-shared Condition<Source> not<Source>(Condition<Source> inner) =>
+shared Condition<Source> _not<Source>(Condition<Source> inner) =>
         Not(inner);
 
 interface Compare<out Source=Anything, out Field=Anything>

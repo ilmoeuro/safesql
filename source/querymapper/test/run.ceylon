@@ -18,10 +18,10 @@ import querymapper.base {
     Table,
     from,
     leftJoin,
+    _and,
     greaterThan,
     asc,
-    and,
-    equal
+    _equal
 }
 
 table
@@ -57,9 +57,9 @@ shared void run() {
             )
         }
         .where (
-            and {
+            _and {
                 greaterThan(devs.column(`Employee.age`), 50),
-                equal(company.column(`Company.name`), "ACME")
+                _equal(company.column(`Company.name`), "ACME")
             }
         )
         .orderBy {
