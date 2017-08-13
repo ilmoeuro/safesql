@@ -12,10 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import ceylon.collection {
-    MutableList,
-    ArrayList
-}
 import ceylon.language.meta.model {
     Class,
     Attribute
@@ -73,109 +69,18 @@ shared sealed class Column<out Source=Anything, Field = Anything>(table, attribu
     shared Attribute<Nothing, Field> attribute;
 }
 
-shared From<Source> from<Source>(
-    Table<Source> source,
-    {Join<Source>*} joins = {}
-) => From(source, joins);
-
-shared sealed class From<Source>(source, joins = {}) {
-    Table<Source> source;
-    {Join<Source>*} joins;
-    
-    shared Where<Source> where(condition) {
-        Condition<Source>? condition;
-        return Where(source, joins, condition);
-    }
-}
-
-shared sealed class Where<Source>(source, joins, condition) {
-    Table<Source> source;
-    {Join<Source>*} joins;
-    Condition<Source>? condition;
-    
-    shared OrderBy<Source> orderBy(ordering) {
-        {Ordering<Source>+} ordering;
-        return OrderBy(source, joins, condition, ordering);
-    }
-
-    shared SelectQuery select<Result>(Table<Result> columns)
-            given Result satisfies Source {
-        return selectQuery(columns, source, {}, condition);
-    }
-}
-
-shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
-    Table<Source> source;
-    {Join<Source>*} joins;
-    Condition<Source>? condition;
-    {Ordering<Source>+} ordering;
-    
-    shared SelectQuery select<Result>(Table<Result> columns)
-            given Result satisfies Source {
-        return selectQuery(columns, source, joins, condition, ordering);
-    }
-}
-
-shared class SelectQuery(query, params) {
+"A possibly parametrized SQL query bundled with its query parameters."
+shared class Query(query, params) {
+    "String representation of the query"
     shared String query;
+    "The bundled query parameters that are required by this query."
     shared {Anything*} params;
     
-    string => "SelectQuery(query=``query``, params=``params``)";
+    string => "Query(query=``query``, params=``params``)";
 }
 
 class CovariantColumn<out Source=Anything, out Field = Anything>(column) {
     Column<Source, Field> column;
-    "The table this column belongs to."
     shared Table<Source> table = column.table;
-    "The attribute that this column is mapped to."
     shared Attribute<Nothing, Field> attribute = column.attribute;
-}
-
-void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
-    switch (where) 
-    case (is Compare<Source>) {
-        value lit = where.rhs;
-        result.add(lit);
-    }
-    case (is BinaryCondition<Source>) {
-        for (condition in where.conditions) {
-            extractConditionParams(result, condition);
-        }
-    }
-    case (is UnaryCondition<Source>) {
-        extractConditionParams(result, where.inner);
-    }
-}
-
-SelectQuery selectQuery<Result, Source>(
-    columns,
-    source,
-    joins,
-    condition = null,
-    ordering = {}
-) given Result satisfies Source {
-    Table<Result> columns;
-    Table<Source> source;
-    {Join<Source>*} joins;
-    Condition<Source>? condition;
-    {Ordering<Source>*} ordering;
-    
-    value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<Anything>();
-    value emitter = PgH2SqlEmitter(queryBuilder.append);
-
-    emitter.select(columns);
-    emitter.from(source);
-    if (is {Join<Source>+} joins) {
-        emitter.joins(joins);
-    }
-    if (exists condition) {
-        emitter.where(condition);
-        extractConditionParams(queryParams, condition);
-    }
-    if (is {Ordering<Source>+} ordering) {
-        emitter.orderBy(ordering);
-    }
-    
-    return SelectQuery(queryBuilder.string, queryParams);
 }

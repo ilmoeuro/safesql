@@ -45,3 +45,10 @@ shared class Key<Target, Field=Integer>(field) extends Object()
     
     shared actual Integer hash => field.hash;
 }
+
+class CovariantKey<out Target = Anything, out Field=Object>(key)
+        given Field satisfies Object {
+    Key<Target, Field> key;
+
+    shared Object field = key.field;
+}

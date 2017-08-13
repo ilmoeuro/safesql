@@ -22,27 +22,35 @@ import querymapper.base {
     greaterThan,
     asc,
     _equal,
-    Key
+    Key,
+    insert
 }
 
 table
 shared class Employee(id, name, age, salary, company) {
-    shared column Key<Employee> id;
-    shared column String name;
-    shared column Integer age;
-    shared column Float salary;
-    shared column Key<Company> company;
+    column
+    shared Key<Employee> id;
+
+    column
+    shared String name;
+
+    column
+    shared Integer age;
+
+    column
+    shared Float salary;
+
+    column
+    shared Key<Company> company;
 }
 
 table
 shared class Company(id, name) {
-    shared column Key<Company> id;
-    shared column String name;
-}
+    column
+    shared Key<Company> id;
 
-table
-shared class Organization(name) {
-    shared column String name;
+    column
+    shared String name;
 }
 
 shared void run() {
@@ -68,4 +76,14 @@ shared void run() {
         }
         .select(devs)
     );
+    
+    value dev = Employee {
+        id = Key<Employee>(0);
+        name = "John Doe";
+        age = 43;
+        salary = 50_000.00;
+        company = Key<Company>(1);
+    };
+    
+    print(insert(dev));
 }

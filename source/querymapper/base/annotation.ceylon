@@ -16,15 +16,21 @@ import ceylon.language.meta.declaration {
     ValueDeclaration,
     ClassDeclaration
 }
+import ceylon.language.meta.model {
+    Model,
+    Attribute,
+    Class
+}
 
 "The annotation class for [[column]] annotation"
 see(`function column`)
-shared final annotation class ColumnAnnotation(name = "")
+shared final annotation class ColumnAnnotation(name = "", insert = true)
     satisfies OptionalAnnotation<
         ColumnAnnotation,
         ValueDeclaration
 > {
     shared String name;
+    shared Boolean insert;
 }
 
 "The annotation to mark an attribute as a database column.
@@ -60,3 +66,23 @@ shared annotation TableAnnotation table(
     String name = ""
 )
         => TableAnnotation(name);
+
+AnnotationType annotationFor<AnnotationType>(Model target)
+        given AnnotationType satisfies Annotation {
+    value decl = target.declaration;
+    value annotations = decl.annotations<AnnotationType>();
+    value typeName = `AnnotationType`.string;
+    "``target`` must be annotated with ``typeName``"
+    assert(exists annotation = annotations.first);
+    return annotation;
+}
+
+ColumnAnnotation columnAnnotation(Attribute<> attr) =>
+        annotationFor<ColumnAnnotation>(attr);
+
+TableAnnotation tableAnnotation(Class<> cls) =>
+        annotationFor<TableAnnotation>(cls);
+    
+{Attribute<>*} columnAttributes(Class<> cls) {
+    return cls.getAttributes<Nothing, Anything>(`ColumnAnnotation`);
+}
