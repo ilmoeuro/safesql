@@ -14,5 +14,5 @@ limitations under the License. */
 
 native("jvm")
 module querymapper.test "1.0.0" {
-    import querymapper.base "1.0.0";
+    shared import querymapper.base "1.0.0";
 }

@@ -21,21 +21,22 @@ import querymapper.base {
     _and,
     greaterThan,
     asc,
-    _equal
+    _equal,
+    Key
 }
 
 table
 shared class Employee(id, name, age, salary, company) {
-    shared column Integer id;
+    shared column Key<Employee> id;
     shared column String name;
     shared column Integer age;
     shared column Float salary;
-    shared column Integer company;
+    shared column Key<Company> company;
 }
 
 table
 shared class Company(id, name) {
-    shared column Integer id;
+    shared column Key<Company> id;
     shared column String name;
 }
 
