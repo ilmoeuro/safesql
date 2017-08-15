@@ -15,16 +15,30 @@ limitations under the License. */
 import ceylon.dbc {
     Sql
 }
+import ceylon.logging {
+    Logger,
+    logger
+}
 
 import querymapper.base {
     SelectQuery,
     InsertQuery
 }
 
-shared class QueryMapper(sql) {
+Logger log = logger(`module`);
+
+shared class QueryMapper(sql, logSql = false) {
     "The [[Sql]] object used to connect to the database and execute queries. You
      can mix [[Sql]] and [[QueryMapper]] queries freely."
     Sql sql;
+    "Log the generated SQL using `ceylon.logging`"
+    Boolean logSql;
+    
+    void logIfEnabled(String message) {
+        if (logSql) {
+            log.debug(message);
+        }
+    }
 
     "Execute a [[SelectQuery]].
      
@@ -51,6 +65,7 @@ shared class QueryMapper(sql) {
     shared {Result*} doSelect<Result>(query) {
         "The query to execute."
         SelectQuery<Result> query;
+        logIfEnabled(query.query);
         return select(sql, query);
     }
     
@@ -68,6 +83,7 @@ shared class QueryMapper(sql) {
      ~~~"
     shared void doInsert<Insertable>(query) {
         InsertQuery<Insertable> query;
+        logIfEnabled(query.query);
         insert(sql, query);
     }
 }

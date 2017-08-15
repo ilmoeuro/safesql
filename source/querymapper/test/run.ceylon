@@ -34,7 +34,8 @@ import querymapper.base {
     Key,
     insert,
     fromRow,
-    Row
+    Row,
+    desc
 }
 import querymapper.dbc {
     QueryMapper
@@ -99,6 +100,7 @@ shared class Company(id, name) {
 }
 
 shared void run() {
+    
     value devs = Table("devs", `Employee`);
     value company = Table("company", `Company`);
     print(
@@ -134,13 +136,16 @@ shared void run() {
     
     value ds = JdbcDataSource();
     ds.setURL("jdbc:h2:mem:;INIT=RUNSCRIPT FROM './db_init.sql'");
+
+    value sql = Sql(newConnectionFromDataSource(ds));
+    value qm = QueryMapper(sql, true);
     
-    try (conn = ds.connection) {
-        value sql = Sql(newConnectionFromDataSource(ds));
-        value qm = QueryMapper(sql);
-        sql.transaction(() {
+    try (ds.connection) {
+        try(sql.Transaction()) {
             qm.doInsert(insert(dev));
+        }
             
+        try(sql.Transaction()) {
             value results = qm.doSelect(
                 from {
                     devs;
@@ -148,14 +153,15 @@ shared void run() {
                 .where (
                     null
                 )
+                .orderBy {
+                    desc(devs.column(`Employee.age`))
+                }
                 .select(devs)
             );
             
             for (result in results) {
                 print(result);
             }
-            
-            return true;
-        });
+        }
     }
 }
