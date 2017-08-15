@@ -13,12 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import ceylon.dbc {
-    Sql,
-    newConnectionFromDataSource
-}
-
-import javax.sql {
-    DataSource
+    Sql
 }
 
 import querymapper.base {
@@ -26,14 +21,10 @@ import querymapper.base {
     InsertQuery
 }
 
-shared class QueryMapper(database) {
-    Sql|DataSource database;
+shared class QueryMapper(sql) {
+    "The [[Sql]] object used to connect to the database and execute queries. You
+     can mix [[Sql]] and [[QueryMapper]] queries freely."
     Sql sql;
-    if (is Sql database) {
-        sql = database;
-    } else {
-        sql = Sql(newConnectionFromDataSource(database));
-    }
 
     "Execute a [[SelectQuery]].
      
