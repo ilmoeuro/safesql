@@ -63,13 +63,14 @@ shared sealed class Where<Source>(source, joins, condition) {
     }
 
     "Finish the `SELECT` query."
-    shared Query select<Result>(columns) given Result satisfies Source {
+    shared SelectQuery<Result> select<Result>(columns) given Result satisfies Source {
         "The table to pick from the query as the result"
         Table<Result> columns;
         return selectQuery(columns, source, {}, condition);
     }
 }
 
+"The auxiliary class used by [[Where.orderBy]]"
 shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
     Table<Source> source;
     {Join<Source>*} joins;
@@ -77,7 +78,7 @@ shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
     {Ordering<Source>*} ordering;
     
     "Finish the `SELECT` query."
-    shared Query select<Result>(columns)
+    shared SelectQuery<Result> select<Result>(columns)
             given Result satisfies Source {
         "The table to pick from the query as the result"
         Table<Result> columns;
@@ -85,7 +86,26 @@ shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
     }
 }
 
-Query selectQuery<Result, Source>(
+"A `SELECT` query.
+ 
+ Use [[from]] to build instances of this class."
+see(`function from`)
+shared sealed class SelectQuery<Result>(query, params, resultTable) {
+    "String representation of the query"
+    shared String query;
+    "The bundled query parameters that are required by this query."
+    shared {[Anything, Attribute<Nothing,Anything,Nothing>]*} params;
+    "The (aliased) table the result comes from, used for aliased column names."
+    shared Table<Result> resultTable;
+    
+    string => "`` `class`.qualifiedName `` {
+                   query=``query``,
+                   params=``params``,
+                   resultTable=``resultTable``
+               }";
+}
+
+SelectQuery<Result> selectQuery<Result, Source>(
     columns,
     source,
     joins,
@@ -115,7 +135,7 @@ Query selectQuery<Result, Source>(
         emitter.orderBy(ordering);
     }
     
-    return Query(queryBuilder.string, queryParams);
+    return SelectQuery<Result>(queryBuilder.string, queryParams, columns);
 }
 
 void extractConditionParams<Source>(MutableList<[Anything, Attribute<>]> result, Condition<Source> where) {

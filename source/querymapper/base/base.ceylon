@@ -79,16 +79,6 @@ shared sealed class Column<out Source=Anything, Field = Anything>(table, attribu
     shared Attribute<Nothing, Field> attribute;
 }
 
-"A possibly parametrized SQL query bundled with its query parameters."
-shared class Query(query, params) {
-    "String representation of the query"
-    shared String query;
-    "The bundled query parameters that are required by this query."
-    shared {[Anything, Attribute<>]*} params;
-    
-    string => "Query(query=``query``, params=``params``)";
-}
-
 shared class Row<EntityType>(values) {
     Map<Attribute<>, Anything> values;
     
@@ -100,7 +90,6 @@ shared class Row<EntityType>(values) {
         return result;
     }
 }
-
 
 class CovariantColumn<out Source=Anything, out Field = Anything> {
     shared Table<Source> table;

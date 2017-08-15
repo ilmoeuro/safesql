@@ -133,10 +133,15 @@ shared void run() {
     try (ds.connection) {
         value qm = QueryMapper(ds);
         
-        value results = qm
-                .from(devs)
-                .where(greaterThan(devs.column(`Employee.age`), 10))
-                .select(devs);
+        value results = qm.doSelect(
+            from {
+                devs;
+            }
+            .where (
+                greaterThan(devs.column(`Employee.age`), 10)
+            )
+            .select(devs)
+        );
         
         for (result in results) {
             print(result);

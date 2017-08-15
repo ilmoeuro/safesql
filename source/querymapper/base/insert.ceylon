@@ -20,7 +20,18 @@ import ceylon.language.meta.model {
     Attribute
 }
 
-shared Query insert<Insertable>(Insertable insertable)
+suppressWarnings("unusedDeclaration") // Result is a phantom type parameter
+shared sealed class InsertQuery<Insertable>(query, params) {
+    shared String query;
+    shared {[Anything, Attribute<Nothing,Anything,Nothing>]*} params;
+
+    string => "`` `class`.qualifiedName `` {
+                   query=``query``,
+                   params=``params``
+               }";
+}
+
+shared InsertQuery<Insertable> insert<Insertable>(Insertable insertable)
         given Insertable satisfies Object {
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<[Anything, Attribute<>]>();
@@ -42,5 +53,5 @@ shared Query insert<Insertable>(Insertable insertable)
         }
     }
 
-    return Query(queryBuilder.string, queryParams);
+    return InsertQuery<Insertable>(queryBuilder.string, queryParams);
 }
