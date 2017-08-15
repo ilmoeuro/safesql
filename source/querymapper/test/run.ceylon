@@ -28,7 +28,8 @@ import querymapper.base {
     _equal,
     Key,
     insert,
-    fromRow
+    fromRow,
+    Row
 }
 import querymapper.dbc {
     QueryMapper
@@ -37,19 +38,19 @@ import querymapper.dbc {
 table
 shared class Employee {
     column
-    shared variable Key<Employee> id;
+    shared Key<Employee> id;
 
     column
-    shared variable String name;
+    shared String name;
 
     column
-    shared variable Integer age;
+    shared Integer age;
 
     column
-    shared variable Float salary;
+    shared Float salary;
 
     column
-    shared variable Key<Company> company;
+    shared Key<Company> company;
     
     shared new (id, name, age, salary, company) {
         Key<Employee> id;
@@ -66,12 +67,12 @@ shared class Employee {
     
     suppressWarnings("unusedDeclaration")
     fromRow
-    new fromRow() {
-        id = Key<Employee>(0);
-        name = "";
-        age = 0;
-        salary = 0.0;
-        company = Key<Company>(0);
+    new fromRow(Row<Employee> row) {
+        id = row.get(`id`);
+        name = row.get(`name`);
+        age = row.get(`age`);
+        salary = row.get(`salary`);
+        company = row.get(`company`);
     }
     
     string => "`` `class`.qualifiedName `` {

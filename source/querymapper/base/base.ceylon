@@ -14,8 +14,7 @@ limitations under the License. */
 
 import ceylon.language.meta.model {
     Class,
-    Attribute,
-    Type
+    Attribute
 }
 
 "An aliased database table to be used in queries.
@@ -35,10 +34,17 @@ import ceylon.language.meta.model {
  
  "
 shared final class Table<out Source=Anything>(name, cls) {
-    "The name of the alias. **Not** statically checked for collisions."
+    "The name of the alias. **Not** statically checked for collisions. **Must
+     not** include '.' characters."
     shared String name;
     "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
     shared Class<Source> cls;
+    
+    "No '.' characters allowed in alias names."
+    assert (!("." in name));
+    
+    // Check that `cls` is properly annotated
+    tableAnnotation(cls);
     
     "The [[Column]] object attached to this table, mapped to an attribute
      of the mapped class."
@@ -47,6 +53,9 @@ shared final class Table<out Source=Anything>(name, cls) {
          [[querymapper.base::column]]."
         Attribute<Source, Field> attribute
     ) {
+        // Check that `attribute` is properly annotated
+        columnAnnotation(attribute);
+
         return Column(this, attribute);
     }
 }
@@ -79,6 +88,19 @@ shared class Query(query, params) {
     
     string => "Query(query=``query``, params=``params``)";
 }
+
+shared class Row<EntityType>(values) {
+    Map<Attribute<>, Anything> values;
+    
+    shared ValueType get<ValueType>(attr) {
+        Attribute<EntityType, ValueType> attr;
+        
+        "The returned database row contains a value of wrong type"
+        assert (is ValueType result = values[attr]);
+        return result;
+    }
+}
+
 
 class CovariantColumn<out Source=Anything, out Field = Anything> {
     shared Table<Source> table;

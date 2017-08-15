@@ -52,8 +52,9 @@ import querymapper.base {
     columnAttributes,
     FromRowAnnotation,
     fromRow,
-    underscoredColumnAlias,
-    Key
+    qualifiedColumnAlias,
+    Key,
+    Row
 }
 
 shared class QueryMapper(dataSource) {
@@ -194,19 +195,18 @@ Anything fromSqlObject(Object source, Type<Anything> type) {
     
     return rows.map((row) {
         assert (is Class<> model = `Result`);
-        value ctors = model.getDeclaredCallableConstructors<[]>(`FromRowAnnotation`);
+        value ctors = model.getDeclaredCallableConstructors<[Row<Result>]>(`FromRowAnnotation`);
         value modelName = model.declaration.qualifiedName;
         value annotationName = `function fromRow`.qualifiedName;
         "``modelName`` must have exactly one no-arg constructor annotated ``annotationName``"
         assert (exists ctor = ctors[0]);
         assert (is CallableConstructor<Result> ctor);
-        value result = ctor.apply();
-        for (attr in columnAttributes(model)) {
+        value entries = columnAttributes(model).map((attr) {
             assert (is Attribute<Result> attr);
-            value colName = underscoredColumnAlias(columns.column(attr));
+            value colName = qualifiedColumnAlias(columns.column(attr));
             assert (exists val = row[colName]);
-            attr.bind(result).setIfAssignable(fromSqlObject(val, attr.type));
-        }
-        return result;
+            return attr -> fromSqlObject(val, attr.type);
+        });
+        return ctor.apply(Row<Result>(map(entries)));
     });
 }

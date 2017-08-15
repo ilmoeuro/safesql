@@ -15,7 +15,7 @@ limitations under the License. */
 import ceylon.language.meta.declaration {
     ValueDeclaration,
     ClassDeclaration,
-    ConstructorDeclaration
+    CallableConstructorDeclaration
 }
 import ceylon.language.meta.model {
     Model,
@@ -73,18 +73,38 @@ see(`function fromRow`)
 shared final annotation class FromRowAnnotation()
     satisfies OptionalAnnotation<
         FromRowAnnotation,
-        ConstructorDeclaration
+        CallableConstructorDeclaration
 > {
 }
 
 "The annotation for the no-arg constructor that builds the object from a database row.
  
  If you want to retrieve objects using a [[from]] query, annotate one
- constructor with this annotation. The constructor should have no arguments; the
- values will be directly injected into attributes annotated with [[column]]. The
- constructor doesn't need to be shared. Instances of a class without a
+ constructor with this annotation. The constructor **must** have one argument, a
+ [[Row]], parametrized with the annotated class. Instances of a class without a
  constructor annotated with this annotation **cannot be retrieved** using
- queries."
+ queries.
+ 
+ Use the [[Row]] argument to retrieve the attribute values, like this:
+
+ ~~~
+ table
+ shared class Employee {
+     column
+     shared Key<Employee> id;
+ 
+     column
+     shared String name;
+
+     suppressWarnings(\"unusedDeclaration\")
+     fromRow
+     new fromRow(Row<Employee> row) {
+         id = row.get(`id`);
+         name = row.get(`name`);
+     }
+ }
+ ~~~
+ "
 shared annotation FromRowAnnotation fromRow() => FromRowAnnotation();
 
 AnnotationType annotationFor<AnnotationType>(Model target)
