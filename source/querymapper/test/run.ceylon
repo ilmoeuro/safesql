@@ -12,6 +12,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import ceylon.dbc {
+    Sql,
+    newConnectionFromDataSource
+}
+
 import org.h2.jdbcx {
     JdbcDataSource
 }
@@ -118,7 +123,7 @@ shared void run() {
     );
     
     value dev = Employee {
-        id = Key<Employee>(0);
+        id = Key<Employee>(2);
         name = "John Doe";
         age = 43;
         salary = 50_000.00;
@@ -130,21 +135,27 @@ shared void run() {
     value ds = JdbcDataSource();
     ds.setURL("jdbc:h2:mem:;INIT=RUNSCRIPT FROM './db_init.sql'");
     
-    try (ds.connection) {
-        value qm = QueryMapper(ds);
-        
-        value results = qm.doSelect(
-            from {
-                devs;
+    try (conn = ds.connection) {
+        value sql = Sql(newConnectionFromDataSource(ds));
+        value qm = QueryMapper(sql);
+        sql.transaction(() {
+            qm.doInsert(insert(dev));
+            
+            value results = qm.doSelect(
+                from {
+                    devs;
+                }
+                .where (
+                    null
+                )
+                .select(devs)
+            );
+            
+            for (result in results) {
+                print(result);
             }
-            .where (
-                greaterThan(devs.column(`Employee.age`), 10)
-            )
-            .select(devs)
-        );
-        
-        for (result in results) {
-            print(result);
-        }
+            
+            return true;
+        });
     }
 }

@@ -12,16 +12,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import ceylon.dbc {
+    Sql,
+    newConnectionFromDataSource
+}
+
 import javax.sql {
     DataSource
 }
 
 import querymapper.base {
-    SelectQuery
+    SelectQuery,
+    InsertQuery
 }
 
-shared class QueryMapper(dataSource) {
-    DataSource dataSource;
+shared class QueryMapper(database) {
+    Sql|DataSource database;
+    Sql sql;
+    if (is Sql database) {
+        sql = database;
+    } else {
+        sql = Sql(newConnectionFromDataSource(database));
+    }
 
     "Execute a [[SelectQuery]].
      
@@ -29,7 +41,7 @@ shared class QueryMapper(dataSource) {
      method to be executed. Example:
      
      ~~~
-     value qm = QueryMapper(ds);
+     value qm = QueryMapper(sql);
      
      value results = qm.doSelect(
          from {
@@ -48,6 +60,23 @@ shared class QueryMapper(dataSource) {
     shared {Result*} doSelect<Result>(query) {
         "The query to execute."
         SelectQuery<Result> query;
-        return select(dataSource, query);
+        return select(sql, query);
+    }
+    
+    "Execute an [[InsertQuery]].
+     
+     Use [[querymapper.base::insert]] to build the query, and pass it to this
+     method to be executed. Example:
+     
+     ~~~
+     Employee employee = /* ... */;
+     
+     value qm = QueryMapper(sql);
+     
+     qm.doInsert(insert(employee));
+     ~~~"
+    shared void doInsert<Insertable>(query) {
+        InsertQuery<Insertable> query;
+        insert(sql, query);
     }
 }
