@@ -21,9 +21,9 @@ abstract class SqlEmitter(Anything(String) emit) {
     shared formal void startIdentifier();
     shared formal void endIdentifier();
     
-    void bareColumnName(Attribute<> attribute) {
+    shared void bareColumnName(Attribute<> attribute) {
         value decl = attribute.declaration;
-        value annotation = annotationFor<ColumnAnnotation>(attribute);
+        value annotation = columnAnnotation(attribute);
         startIdentifier();
         if (annotation.name != "") {
             emit(annotation.name);
@@ -33,15 +33,29 @@ abstract class SqlEmitter(Anything(String) emit) {
         endIdentifier();
     }
 
-    void columnName(CovariantColumn<> column) {
+    shared void columnName(CovariantColumn<> column) {
         startIdentifier();
         emit(column.table.name);
         endIdentifier();
         emit(".");
         bareColumnName(column.attribute);
     }
+    
+    shared void underscoredColumnAlias(CovariantColumn<> column) {
+        value attribute = column.attribute;
+        value decl = attribute.declaration;
+        value annotation = columnAnnotation(attribute);
 
-    void bareTableName(Class<> table) {
+        emit(column.table.name);
+        emit("_");
+        if (annotation.name != "") {
+            emit(annotation.name);
+        } else {
+            emit(decl.name);
+        }
+    }
+
+    shared void bareTableName(Class<> table) {
         value decl = table.declaration;
         value annotation = tableAnnotation(table);
         startIdentifier();
@@ -53,7 +67,7 @@ abstract class SqlEmitter(Anything(String) emit) {
         endIdentifier();
     }
     
-    void tableName(Table<> table) {
+    shared void tableName(Table<> table) {
         bareTableName(table.cls);
         emit(" AS ");
         startIdentifier();
@@ -72,6 +86,11 @@ abstract class SqlEmitter(Anything(String) emit) {
             endIdentifier();
             emit(".");
             bareColumnName(attribute);
+            emit(" AS ");
+            startIdentifier();
+            value column = CovariantColumn.fromValues(table, attribute);
+            underscoredColumnAlias(column);
+            endIdentifier();
         }
     }
 
@@ -216,4 +235,11 @@ class PgH2SqlEmitter(Anything(String) emit) extends SqlEmitter(emit) {
     shared actual void startIdentifier() {
         emit("\"");
     }
+}
+
+shared String underscoredColumnAlias<Source, Field>(Column<Source, Field> col) {
+    value result = StringBuilder();
+    value emitter = PgH2SqlEmitter(result.append);
+    emitter.underscoredColumnAlias(CovariantColumn(col));
+    return result.string;
 }

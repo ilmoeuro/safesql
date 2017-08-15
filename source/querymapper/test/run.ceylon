@@ -12,6 +12,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import org.h2.jdbcx {
+    JdbcDataSource
+}
+
 import querymapper.base {
     table,
     column,
@@ -23,25 +27,60 @@ import querymapper.base {
     asc,
     _equal,
     Key,
-    insert
+    insert,
+    fromRow
+}
+import querymapper.dbc {
+    QueryMapper
 }
 
 table
-shared class Employee(id, name, age, salary, company) {
+shared class Employee {
     column
-    shared Key<Employee> id;
+    shared variable Key<Employee> id;
 
     column
-    shared String name;
+    shared variable String name;
 
     column
-    shared Integer age;
+    shared variable Integer age;
 
     column
-    shared Float salary;
+    shared variable Float salary;
 
     column
-    shared Key<Company> company;
+    shared variable Key<Company> company;
+    
+    shared new (id, name, age, salary, company) {
+        Key<Employee> id;
+        String name;
+        Integer age;
+        Float salary;
+        Key<Company> company;
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+        this.company = company;
+    }
+    
+    suppressWarnings("unusedDeclaration")
+    fromRow
+    new fromRow() {
+        id = Key<Employee>(0);
+        name = "";
+        age = 0;
+        salary = 0.0;
+        company = Key<Company>(0);
+    }
+    
+    string => "`` `class`.qualifiedName `` {
+                 id = ``id``,
+                 name = ``name``,
+                 age = ``age``,
+                 salary = ``salary``,
+                 company = ``company``
+               }";
 }
 
 table
@@ -86,4 +125,20 @@ shared void run() {
     };
     
     print(insert(dev));
+    
+    value ds = JdbcDataSource();
+    ds.setURL("jdbc:h2:mem:;INIT=RUNSCRIPT FROM './db_init.sql'");
+    
+    try (ds.connection) {
+        value qm = QueryMapper(ds);
+        
+        value results = qm
+                .from(devs)
+                .where(greaterThan(devs.column(`Employee.age`), 10))
+                .select(devs);
+        
+        for (result in results) {
+            print(result);
+        }
+    }
 }

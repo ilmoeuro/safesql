@@ -44,6 +44,8 @@ shared class Key<Target, Field=Integer>(field) extends Object()
     }
     
     shared actual Integer hash => field.hash;
+    
+    shared actual String string => "Key<`` `Target` ``>(``field``)";
 }
 
 class CovariantKey<out Target = Anything, out Field=Object>(key)

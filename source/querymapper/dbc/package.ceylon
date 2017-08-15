@@ -12,9 +12,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-native("jvm")
-module querymapper.test "1.0.0" {
-    shared import querymapper.base "1.0.0";
-    shared import querymapper.dbc "1.0.0";
-    shared import maven:"com.h2database":"h2" "1.4.196";
-}
+shared package querymapper.dbc;

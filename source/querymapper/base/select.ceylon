@@ -16,34 +16,56 @@ import ceylon.collection {
     ArrayList,
     MutableList
 }
+import ceylon.language.meta.model {
+    Attribute
+}
 
+"The entry point to a `SELECT` query, builds the `FROM` clause of the query.
+ 
+ The `FROM` clause is **first**, because it then determines the table types
+ that can be used in the rest of the query, which aids in type inference
+ and autocompletion."
 shared From<Source> from<Source>(
+    "The first table to select from, that may be subject to joins"
     Table<Source> source,
+    "The joins, applied in order."
+    see(`function innerJoin`,
+        `function leftJoin`,
+        `function rightJoin`,
+        `function crossJoin`)
     {Join<Source>*} joins = {}
 ) => From(source, joins);
 
+"The auxiliary class used by [[from]]"
 shared sealed class From<Source>(source, joins = {}) {
     Table<Source> source;
     {Join<Source>*} joins;
     
+    "Build the `WHERE` cause of the query."
     shared Where<Source> where(condition) {
+        "The condition of the `WHERE` clause"
         Condition<Source>? condition;
         return Where(source, joins, condition);
     }
 }
 
+"The auxiliary class used by [[From.where]]"
 shared sealed class Where<Source>(source, joins, condition) {
     Table<Source> source;
     {Join<Source>*} joins;
     Condition<Source>? condition;
     
+    "Build the `ORDER BY` clause of the query"
     shared OrderBy<Source> orderBy(ordering) {
-        {Ordering<Source>+} ordering;
+        "The criteria to order the results by."
+        {Ordering<Source>*} ordering;
         return OrderBy(source, joins, condition, ordering);
     }
 
-    shared Query select<Result>(Table<Result> columns)
-            given Result satisfies Source {
+    "Finish the `SELECT` query."
+    shared Query select<Result>(columns) given Result satisfies Source {
+        "The table to pick from the query as the result"
+        Table<Result> columns;
         return selectQuery(columns, source, {}, condition);
     }
 }
@@ -52,10 +74,13 @@ shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
     Table<Source> source;
     {Join<Source>*} joins;
     Condition<Source>? condition;
-    {Ordering<Source>+} ordering;
+    {Ordering<Source>*} ordering;
     
-    shared Query select<Result>(Table<Result> columns)
+    "Finish the `SELECT` query."
+    shared Query select<Result>(columns)
             given Result satisfies Source {
+        "The table to pick from the query as the result"
+        Table<Result> columns;
         return selectQuery(columns, source, joins, condition, ordering);
     }
 }
@@ -74,7 +99,7 @@ Query selectQuery<Result, Source>(
     {Ordering<Source>*} ordering;
     
     value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<Anything>();
+    value queryParams = ArrayList<[Anything, Attribute<>]>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
@@ -93,14 +118,14 @@ Query selectQuery<Result, Source>(
     return Query(queryBuilder.string, queryParams);
 }
 
-void extractConditionParams<Source>(MutableList<Anything> result, Condition<Source> where) {
+void extractConditionParams<Source>(MutableList<[Anything, Attribute<>]> result, Condition<Source> where) {
     switch (where) 
     case (is Compare<Source>) {
         variable Anything val = where.rhs;
         if (is Key<out Anything, out Object> key = val) {
             val = key.field;
         }
-        result.add(val);
+        result.add([val, where.lhs.attribute]);
     }
     case (is BinaryCondition<Source>) {
         for (condition in where.conditions) {

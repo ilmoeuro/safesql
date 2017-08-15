@@ -14,7 +14,8 @@ limitations under the License. */
 
 import ceylon.language.meta.declaration {
     ValueDeclaration,
-    ClassDeclaration
+    ClassDeclaration,
+    ConstructorDeclaration
 }
 import ceylon.language.meta.model {
     Model,
@@ -33,11 +34,11 @@ shared final annotation class ColumnAnnotation(name = "", insert = true)
     shared Boolean insert;
 }
 
-"The annotation to mark an attribute as a database column.
+"The annotation to map an attribute to a database column.
  
- All class attributes that are not annotated as columns are ignored. If you
- specify the `name` parameter, it will be used as the column name, otherwise
- the attribute name will be used as the column name."
+ All attributes not annotated with this annotation are ignored when performing
+ the database mapping. If you specify the `name` parameter, it will be used as
+ the column name, otherwise the attribute name will be used as the column name."
 shared annotation ColumnAnnotation column(
     "The name of the database column corresponding to the annotated attribute.
      If empty, the attribute name itself is used."
@@ -55,17 +56,36 @@ shared final annotation class TableAnnotation(name = "")
     shared String name;
 }
 
-"The annotation to mark a class as a database table.
+"The annotation to map a class to a database table.
  
- Classes can't be used in queries if not annotated `table`. If you specify
- the `name` parameter, it will be used as the table name, otherwise the
- name of the class itself is used."
+ Classes can't be used in queries if not annotated `table`. If you specify the
+ `name` parameter, it will be used as the table name, otherwise the name of the
+ class itself is used."
 shared annotation TableAnnotation table(
     "The name of the database table corresponding to the annotated class.
      If empty, the class name itself is used."
     String name = ""
 )
         => TableAnnotation(name);
+
+"The annotation class for [[fromRow]] annotation."
+see(`function fromRow`)
+shared final annotation class FromRowAnnotation()
+    satisfies OptionalAnnotation<
+        FromRowAnnotation,
+        ConstructorDeclaration
+> {
+}
+
+"The annotation for the no-arg constructor that builds the object from a database row.
+ 
+ If you want to retrieve objects using a [[from]] query, annotate one
+ constructor with this annotation. The constructor should have no arguments; the
+ values will be directly injected into attributes annotated with [[column]]. The
+ constructor doesn't need to be shared. Instances of a class without a
+ constructor annotated with this annotation **cannot be retrieved** using
+ queries."
+shared annotation FromRowAnnotation fromRow() => FromRowAnnotation();
 
 AnnotationType annotationFor<AnnotationType>(Model target)
         given AnnotationType satisfies Annotation {
@@ -77,12 +97,14 @@ AnnotationType annotationFor<AnnotationType>(Model target)
     return annotation;
 }
 
-ColumnAnnotation columnAnnotation(Attribute<> attr) =>
+shared ColumnAnnotation columnAnnotation(Attribute<> attr) =>
         annotationFor<ColumnAnnotation>(attr);
 
-TableAnnotation tableAnnotation(Class<> cls) =>
+shared TableAnnotation tableAnnotation(Class<> cls) =>
         annotationFor<TableAnnotation>(cls);
     
-{Attribute<>*} columnAttributes(Class<> cls) {
-    return cls.getAttributes<Nothing, Anything>(`ColumnAnnotation`);
+shared {Attribute<>*} columnAttributes(Class<> cls) {
+    return cls
+            .getAttributes<Nothing, Anything>(`ColumnAnnotation`)
+            .sort((a1, a2) => a1.declaration.name <=> a2.declaration.name);
 }

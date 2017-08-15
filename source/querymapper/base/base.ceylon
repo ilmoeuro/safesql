@@ -14,7 +14,8 @@ limitations under the License. */
 
 import ceylon.language.meta.model {
     Class,
-    Attribute
+    Attribute,
+    Type
 }
 
 "An aliased database table to be used in queries.
@@ -74,13 +75,24 @@ shared class Query(query, params) {
     "String representation of the query"
     shared String query;
     "The bundled query parameters that are required by this query."
-    shared {Anything*} params;
+    shared {[Anything, Attribute<>]*} params;
     
     string => "Query(query=``query``, params=``params``)";
 }
 
-class CovariantColumn<out Source=Anything, out Field = Anything>(column) {
-    Column<Source, Field> column;
-    shared Table<Source> table = column.table;
-    shared Attribute<Nothing, Field> attribute = column.attribute;
+class CovariantColumn<out Source=Anything, out Field = Anything> {
+    shared Table<Source> table;
+    shared Attribute<Nothing, Field> attribute;
+    
+    shared new(Column<Source, Field> column) {
+        table = column.table;
+        attribute = column.attribute;
+    }
+    
+    shared new fromValues(table, attribute) {
+        Table<Source> table;
+        Attribute<Nothing, Field> attribute;
+        this.table = table;
+        this.attribute = attribute;
+    }
 }

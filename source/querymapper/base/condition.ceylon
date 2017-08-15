@@ -28,7 +28,7 @@ shared interface Condition<out Source = Anything>
     
 }
 
-"A condition that maps to the `=` SQL operator"
+"The `=` SQL operator"
 shared Condition<Source> _equal<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
@@ -37,7 +37,7 @@ shared Condition<Source> _equal<Source, Field>(lhs, rhs) {
     return Equal(CovariantColumn(lhs), rhs);
 }
 
-"A condition that maps to the `<=` SQL operator"
+"The `<=` SQL operator"
 shared Condition<Source> atMost<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
@@ -46,7 +46,7 @@ shared Condition<Source> atMost<Source, Field>(lhs, rhs) {
     return AtMost(CovariantColumn(lhs), rhs);
 }
 
-"A condition that maps to the `<` SQL operator"
+"The `<` SQL operator"
 shared Condition<Source> lessThan<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
@@ -55,7 +55,7 @@ shared Condition<Source> lessThan<Source, Field>(lhs, rhs) {
     return LessThan(CovariantColumn(lhs), rhs);
 }
 
-"A condition that maps to the `>=` SQL operator"
+"The `>=` SQL operator"
 shared Condition<Source> atLeast<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
@@ -64,7 +64,7 @@ shared Condition<Source> atLeast<Source, Field>(lhs, rhs) {
     return AtLeast(CovariantColumn(lhs), rhs);
 }
 
-"A condition that maps to the `>` SQL operator"
+"The `>` SQL operator"
 shared Condition<Source> greaterThan<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
@@ -73,21 +73,21 @@ shared Condition<Source> greaterThan<Source, Field>(lhs, rhs) {
     return GreaterThan(CovariantColumn(lhs), rhs);
 }
 
-"A condition that maps to the `AND` SQL operator"
+"The `AND` SQL operator"
 shared Condition<Source> _and<Source>(conditions) {
     "The conditions that are joined with `AND`"
     {Condition<Source>+} conditions;
     return And(conditions);
 }
 
-"A condition that maps to the `OR` SQL operator"
+"The `OR` SQL operator"
 shared Condition<Source> _or<Source>(conditions) {
     "The conditions that are joined with `OR`"
     {Condition<Source>+} conditions;
     return Or(conditions);
 }
 
-"A condition that maps to the `NOT` SQL operator"
+"The `NOT` SQL operator"
 shared Condition<Source> _not<Source>(inner) {
     "The inverted condition."
     Condition<Source> inner;

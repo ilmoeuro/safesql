@@ -16,13 +16,14 @@ import ceylon.collection {
     ArrayList
 }
 import ceylon.language.meta.model {
-    Class
+    Class,
+    Attribute
 }
 
 shared Query insert<Insertable>(Insertable insertable)
         given Insertable satisfies Object {
     value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<Anything>();
+    value queryParams = ArrayList<[Anything, Attribute<>]>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
     value fnName = `function insert`.name;
     value insertableName = `Insertable`.string;
@@ -37,7 +38,7 @@ shared Query insert<Insertable>(Insertable insertable)
             if (is Key<out Anything, out Object> key = val) {
                 val = key.field;
             }
-            queryParams.add(val);
+            queryParams.add([val, attribute]);
         }
     }
 
