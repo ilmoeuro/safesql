@@ -35,7 +35,6 @@ import safesql.core {
     insert,
     fromRow,
     Row,
-    desc,
     defaultWhen,
     inserting
 }

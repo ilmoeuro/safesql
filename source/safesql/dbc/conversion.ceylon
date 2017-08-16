@@ -38,16 +38,16 @@ Object toJdbcObject([Anything, Attribute<>] param) {
     value [source, attr] = param;
     if (!exists source) {
         // TODO more flexible SqlNulls (eg. varchar/text for Strings)
-        if (attr.type == `Integer`) {
+        if (attr.type == `Integer?`) {
             return SqlNull(Types.integer);
         }
-        if (attr.type == `String`) {
+        if (attr.type == `String?`) {
             return SqlNull(Types.varchar);
         }
-        if (attr.type == `Float`) {
+        if (attr.type == `Float?`) {
             return SqlNull(Types.double);
         }
-        if (attr.type.subtypeOf(`Key<out Anything, out Object>`)) {
+        if (attr.type.subtypeOf(`Key<out Anything, out Object>?`)) {
             return SqlNull(Types.integer);
         }
         return SqlNull(Types.binary);

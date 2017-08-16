@@ -20,27 +20,34 @@ shared interface Join<out Source=Anything>
 }
 
 "The `INNER JOIN` clause."
-shared Join<Source> innerJoin<Source, Field>(table, leftKey, rightKey) {
+shared Join<Source> innerJoin<Source, Field>(table, leftKey, rightKey)
+        given Field satisfies Object {
     Table<Source> table;
-    Column<Source, Field> leftKey;
-    Column<Source, Field> rightKey;
-    return InnerJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
+    Column<Source, Field>|Column<Source, Field?> leftKey;
+    Column<Source, Field>|Column<Source, Field?> rightKey;
+    return InnerJoin(table,
+        CovariantColumn.fromValues(leftKey.table, leftKey.attribute),
+        CovariantColumn.fromValues(rightKey.table, rightKey.attribute));
 }
 
 "The `LEFT (OUTER) JOIN` clause."
 shared Join<Source> leftJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
-    Column<Source, Field> leftKey;
-    Column<Source, Field> rightKey;
-    return LeftJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
+    Column<Source, Field>|Column<Source, Field?> leftKey;
+    Column<Source, Field>|Column<Source, Field?> rightKey;
+    return LeftJoin(table,
+        CovariantColumn.fromValues(leftKey.table, leftKey.attribute),
+        CovariantColumn.fromValues(rightKey.table, rightKey.attribute));
 }
 
 "The `RIGHT (OUTER) JOIN` clause."
 shared Join<Source> rightJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
-    Column<Source, Field> leftKey;
-    Column<Source, Field> rightKey;
-    return RightJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
+    Column<Source, Field>|Column<Source, Field?> leftKey;
+    Column<Source, Field>|Column<Source, Field?> rightKey;
+    return RightJoin(table,
+        CovariantColumn.fromValues(leftKey.table, leftKey.attribute),
+        CovariantColumn.fromValues(rightKey.table, rightKey.attribute));
 }
 
 "The `CROSS JOIN` clause."
@@ -52,8 +59,8 @@ interface KeyedJoin<out Source=Anything, out Field=Anything>
         | LeftJoin<Source, Field>
         | RightJoin<Source, Field>
         satisfies Join<Source> {
-    shared formal CovariantColumn<Source, Field> leftKey;
-    shared formal CovariantColumn<Source, Field> rightKey;
+    shared formal CovariantColumn<Source, Field?> leftKey;
+    shared formal CovariantColumn<Source, Field?> rightKey;
 }
 
 class InnerJoin<out Source=Anything, out Field=Anything>(
@@ -62,8 +69,8 @@ class InnerJoin<out Source=Anything, out Field=Anything>(
     rightKey
 ) satisfies KeyedJoin<Source, Field> {
     shared actual Table<Source> table;
-    shared actual CovariantColumn<Source, Field> leftKey;
-    shared actual CovariantColumn<Source, Field> rightKey;
+    shared actual CovariantColumn<Source, Field?> leftKey;
+    shared actual CovariantColumn<Source, Field?> rightKey;
 }
 
 class LeftJoin<out Source=Anything, out Field=Anything>(
@@ -72,8 +79,8 @@ class LeftJoin<out Source=Anything, out Field=Anything>(
     rightKey
 ) satisfies KeyedJoin<Source, Field> {
     shared actual Table<Source> table;
-    shared actual CovariantColumn<Source, Field> leftKey;
-    shared actual CovariantColumn<Source, Field> rightKey;
+    shared actual CovariantColumn<Source, Field?> leftKey;
+    shared actual CovariantColumn<Source, Field?> rightKey;
 }
 
 class RightJoin<out Source=Anything, out Field=Anything>(
@@ -82,7 +89,7 @@ class RightJoin<out Source=Anything, out Field=Anything>(
     rightKey
 ) satisfies KeyedJoin<Source, Field> {
     shared actual Table<Source> table;
-    shared actual CovariantColumn<Source, Field> leftKey;
+    shared actual CovariantColumn<Source, Field?> leftKey;
     shared actual CovariantColumn<Source, Field> rightKey;
 }
 
