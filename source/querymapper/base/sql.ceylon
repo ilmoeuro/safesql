@@ -17,6 +17,12 @@ import ceylon.language.meta.model {
     Attribute
 }
 
+import querymapper.backend {
+    columnAnnotation,
+    tableAnnotation,
+    columnAttributes
+}
+
 abstract class SqlEmitter(Anything(String) emit) {
     shared formal void startIdentifier();
     shared formal void endIdentifier();
@@ -25,11 +31,7 @@ abstract class SqlEmitter(Anything(String) emit) {
         value decl = attribute.declaration;
         value annotation = columnAnnotation(attribute);
         startIdentifier();
-        if (annotation.name != "") {
-            emit(annotation.name);
-        } else {
-            emit(decl.name);
-        }
+        emit(annotation.nullableName else decl.name);
         endIdentifier();
     }
 
@@ -48,11 +50,7 @@ abstract class SqlEmitter(Anything(String) emit) {
 
         emit(column.table.name);
         emit(".");
-        if (annotation.name != "") {
-            emit(annotation.name);
-        } else {
-            emit(decl.name);
-        }
+        emit(annotation.nullableName else decl.name);
     }
 
     shared void bareTableName(Class<> table) {
@@ -237,9 +235,3 @@ class PgH2SqlEmitter(Anything(String) emit) extends SqlEmitter(emit) {
     }
 }
 
-shared String qualifiedColumnAlias<Source, Field>(Column<Source, Field> col) {
-    value result = StringBuilder();
-    value emitter = PgH2SqlEmitter(result.append);
-    emitter.qualifiedColumnAlias(CovariantColumn(col));
-    return result.string;
-}

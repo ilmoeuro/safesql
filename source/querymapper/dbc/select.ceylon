@@ -1,3 +1,8 @@
+import querymapper.backend {
+    columnAttributes,
+    RowImpl,
+    qualifiedColumnAlias
+}
 /* Copyright 2017 Ilmo Euro
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +28,8 @@ import ceylon.language.meta.model {
 
 import querymapper.base {
     Row,
-    columnAttributes,
     FromRowAnnotation,
     fromRow,
-    qualifiedColumnAlias,
     SelectQuery
 }
 
@@ -54,6 +57,6 @@ import querymapper.base {
             assert (exists val = row[colName]);
             return attr -> fromJdbcObject(val, attr.type);
         });
-        return ctor.apply(Row<Result>(map(entries)));
+        return ctor.apply(RowImpl<Result>(map(entries)));
     });
 }

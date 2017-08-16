@@ -12,13 +12,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-native("jvm")
-module querymapper.dbc "1.0.0" {
-    shared import java.base "8";
-    shared import querymapper.base "1.0.0";
-    shared import ceylon.dbc "1.3.2";
-
-    import ceylon.interop.java "1.3.2";
-    import ceylon.logging "1.3.2";
-    import querymapper.backend "1.0.0";
-}
+shared package querymapper.backend;

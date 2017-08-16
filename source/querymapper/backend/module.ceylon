@@ -12,22 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-"Project goals:
- 
-  - Type safety
-  - Full power of a subset of SQL common to popular DB's
-  - Non-invasiveness
-  - Cooperation with existing database connections (ceylon.dbc &c)
-  
-  Non-goals:
-  
-  - Synchronizing object graphs between DB and memory
-  - Minimal amount of code
-  - Magic, including manipulating objects' internal state
-"
-by("Ilmo Euro <ilmo.euro@gmail.com>")
-license("[ASL 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)")
-module querymapper.base "1.0.0" {
-    import ceylon.collection "1.3.2";
-    import querymapper.backend "1.0.0";
+module querymapper.backend "1.0.0" {
+    shared import querymapper.base "1.0.0";
 }

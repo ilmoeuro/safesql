@@ -17,6 +17,11 @@ import ceylon.language.meta.model {
     Attribute
 }
 
+import querymapper.backend {
+    columnAnnotation,
+    tableAnnotation
+}
+
 "An aliased database table to be used in queries.
  
  All table names are aliased. The aliases are not generated or checked in
@@ -79,16 +84,10 @@ shared sealed class Column<out Source=Anything, Field = Anything>(table, attribu
     shared Attribute<Nothing, Field> attribute;
 }
 
-shared class Row<EntityType>(values) {
-    Map<Attribute<>, Anything> values;
-    
-    shared ValueType get<ValueType>(attr) {
-        Attribute<EntityType, ValueType> attr;
-        
-        "The returned database row contains a value of wrong type"
-        assert (is ValueType result = values[attr]);
-        return result;
-    }
+shared interface Row<EntityType> {
+    shared formal ValueType get<ValueType>(
+        Attribute<EntityType, ValueType> attr
+    );
 }
 
 class CovariantColumn<out Source=Anything, out Field = Anything> {
