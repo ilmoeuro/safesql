@@ -27,9 +27,9 @@ import safesql.core {
 
 Logger log = logger(`module`);
 
-shared class QueryMapper(sql, logSql = false) {
+shared class SafeSql(sql, logSql = false) {
     "The [[Sql]] object used to connect to the database and execute queries. You
-     can mix [[Sql]] and [[QueryMapper]] queries freely."
+     can mix [[Sql]] and [[SafeSql]] queries freely."
     Sql sql;
     "Log the generated SQL using `ceylon.logging`"
     Boolean logSql;

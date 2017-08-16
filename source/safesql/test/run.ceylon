@@ -38,7 +38,7 @@ import safesql.core {
     desc
 }
 import safesql.dbc {
-    QueryMapper
+    SafeSql
 }
 
 table
@@ -138,7 +138,7 @@ shared void run() {
     ds.setURL("jdbc:h2:mem:;INIT=RUNSCRIPT FROM './db_init.sql'");
 
     value sql = Sql(newConnectionFromDataSource(ds));
-    value qm = QueryMapper(sql, true);
+    value qm = SafeSql(sql, true);
     
     try (ds.connection) {
         try(sql.Transaction()) {
