@@ -21,7 +21,7 @@ import org.h2.jdbcx {
     JdbcDataSource
 }
 
-import querymapper.base {
+import safesql.core {
     table,
     column,
     Table,
@@ -37,7 +37,7 @@ import querymapper.base {
     Row,
     desc
 }
-import querymapper.dbc {
+import safesql.dbc {
     QueryMapper
 }
 

@@ -17,7 +17,7 @@ import ceylon.language.meta.model {
     Attribute
 }
 
-import querymapper.backend {
+import safesql.backend {
     columnAnnotation,
     tableAnnotation,
     columnAttributes

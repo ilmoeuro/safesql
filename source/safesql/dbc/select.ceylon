@@ -1,8 +1,3 @@
-import querymapper.backend {
-    columnAttributes,
-    RowImpl,
-    qualifiedColumnAlias
-}
 /* Copyright 2017 Ilmo Euro
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import safesql.backend {
+    columnAttributes,
+    RowImpl,
+    qualifiedColumnAlias
+}
+
 import ceylon.dbc {
     Sql
 }
@@ -26,7 +27,7 @@ import ceylon.language.meta.model {
     CallableConstructor
 }
 
-import querymapper.base {
+import safesql.core {
     Row,
     FromRowAnnotation,
     fromRow,

@@ -20,7 +20,7 @@ import ceylon.logging {
     logger
 }
 
-import querymapper.base {
+import safesql.core {
     SelectQuery,
     InsertQuery
 }
@@ -42,7 +42,7 @@ shared class QueryMapper(sql, logSql = false) {
 
     "Execute a [[SelectQuery]].
      
-     Use [[querymapper.base::from]] to build the query, and pass it to this
+     Use [[safesql.core::from]] to build the query, and pass it to this
      method to be executed. Example:
      
      ~~~
@@ -71,7 +71,7 @@ shared class QueryMapper(sql, logSql = false) {
     
     "Execute an [[InsertQuery]].
      
-     Use [[querymapper.base::insert]] to build the query, and pass it to this
+     Use [[safesql.core::insert]] to build the query, and pass it to this
      method to be executed. Example:
      
      ~~~

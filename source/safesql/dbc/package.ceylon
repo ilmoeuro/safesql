@@ -12,21 +12,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import ceylon.dbc {
-    Sql
-}
-
-import querymapper.base {
-    InsertQuery
-}
-
-void insert<Insertable>(sql, query) {
-    Sql sql;
-    InsertQuery<Insertable> query;
-
-    value [rows, keys] = sql
-                .Insert(query.query)
-                .execute(*(query.params.map(toJdbcObject)));
-    
-    print([rows, keys]);
-}
+shared package safesql.dbc;

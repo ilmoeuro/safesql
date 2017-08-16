@@ -12,4 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-shared package querymapper.backend;
+native("jvm")
+module safesql.test "1.0.0" {
+    shared import safesql.core "1.0.0";
+    shared import safesql.dbc "1.0.0";
+    shared import maven:"com.h2database":"h2" "1.4.196";
+}

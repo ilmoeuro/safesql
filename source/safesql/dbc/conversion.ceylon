@@ -15,7 +15,7 @@ limitations under the License. */
 import java.sql {
     Types
 }
-import querymapper.base {
+import safesql.core {
     Key
 }
 import java.lang {

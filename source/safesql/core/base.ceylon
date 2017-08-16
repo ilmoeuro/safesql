@@ -17,7 +17,7 @@ import ceylon.language.meta.model {
     Attribute
 }
 
-import querymapper.backend {
+import safesql.backend {
     columnAnnotation,
     tableAnnotation
 }
@@ -42,7 +42,7 @@ shared final class Table<out Source=Anything>(name, cls) {
     "The name of the alias. **Not** statically checked for collisions. **Must
      not** include '.' characters."
     shared String name;
-    "The mapped class. **Must** be annotated with [[querymapper.base::table]]."
+    "The mapped class. **Must** be annotated with [[safesql.core::table]]."
     shared Class<Source> cls;
     
     "No '.' characters allowed in alias names."
@@ -55,7 +55,7 @@ shared final class Table<out Source=Anything>(name, cls) {
      of the mapped class."
     shared Column<Source, Field> column<Field>(
         "The attribute the column maps to. **Must** be annotated with
-         [[querymapper.base::column]]."
+         [[safesql.core::column]]."
         Attribute<Source, Field> attribute
     ) {
         // Check that `attribute` is properly annotated

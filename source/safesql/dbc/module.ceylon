@@ -13,8 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 native("jvm")
-module querymapper.test "1.0.0" {
-    shared import querymapper.base "1.0.0";
-    shared import querymapper.dbc "1.0.0";
-    shared import maven:"com.h2database":"h2" "1.4.196";
+module safesql.dbc "1.0.0" {
+    shared import java.base "8";
+    shared import safesql.core "1.0.0";
+    shared import ceylon.dbc "1.3.2";
+
+    import ceylon.interop.java "1.3.2";
+    import ceylon.logging "1.3.2";
+    import safesql.backend "1.0.0";
 }

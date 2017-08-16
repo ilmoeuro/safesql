@@ -12,6 +12,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-module querymapper.backend "1.0.0" {
-    shared import querymapper.base "1.0.0";
-}
+shared package safesql.backend;
