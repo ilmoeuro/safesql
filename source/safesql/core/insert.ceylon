@@ -63,13 +63,11 @@ shared InsertQuery<Insertable> insert<Insertable>(insertable)
     tableAnnotation(type);
     
     for (attribute in columnAttributes(type)) {
-        if (columnAnnotation(attribute).insert) {
-            variable Anything val = attribute.bind(insertable).get();
-            if (is Key<out Anything, out Object> key = val) {
-                val = key.field;
-            }
-            queryParams.add([val, attribute]);
+        variable Anything val = attribute.bind(insertable).get();
+        if (is Key<out Anything, out Object> key = val) {
+            val = key.field;
         }
+        queryParams.add([val, attribute]);
     }
 
     return InsertQuery<Insertable>(queryBuilder.string, queryParams);

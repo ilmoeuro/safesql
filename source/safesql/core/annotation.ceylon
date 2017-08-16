@@ -20,13 +20,12 @@ import ceylon.language.meta.declaration {
 
 "The annotation class for [[column]] annotation"
 see(`function column`)
-shared final annotation class ColumnAnnotation(name = "", insert = true)
+shared final annotation class ColumnAnnotation(name = "")
     satisfies OptionalAnnotation<
         ColumnAnnotation,
         ValueDeclaration
 > {
     shared String name;
-    shared Boolean insert;
     
     shared String? nullableName => if (name != "") then name else null;
 }

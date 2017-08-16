@@ -192,8 +192,7 @@ abstract class SqlEmitter(Anything(String) emit) {
     
     shared void insert(Class<> model) {
         function inserted(Attribute<> attribute) {
-            value annotation = columnAnnotation(attribute);
-            return annotation.insert;
+            return true;
         } 
         
         emit("INSERT INTO ");

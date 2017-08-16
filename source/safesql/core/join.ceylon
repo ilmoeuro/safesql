@@ -12,12 +12,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+"A `JOIN` clause, to be used in `FROM`."
 shared interface Join<out Source=Anything>
         of KeyedJoin<Source>
         |  CrossJoin<Source> {
     shared formal Table<Source> table;
 }
 
+"The `INNER JOIN` clause."
 shared Join<Source> innerJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
     Column<Source, Field> leftKey;
@@ -25,6 +27,7 @@ shared Join<Source> innerJoin<Source, Field>(table, leftKey, rightKey) {
     return InnerJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
 }
 
+"The `LEFT (OUTER) JOIN` clause."
 shared Join<Source> leftJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
     Column<Source, Field> leftKey;
@@ -32,6 +35,7 @@ shared Join<Source> leftJoin<Source, Field>(table, leftKey, rightKey) {
     return LeftJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
 }
 
+"The `RIGHT (OUTER) JOIN` clause."
 shared Join<Source> rightJoin<Source, Field>(table, leftKey, rightKey) {
     Table<Source> table;
     Column<Source, Field> leftKey;
@@ -39,6 +43,7 @@ shared Join<Source> rightJoin<Source, Field>(table, leftKey, rightKey) {
     return RightJoin(table, CovariantColumn(leftKey), CovariantColumn(rightKey));
 }
 
+"The `CROSS JOIN` clause."
 shared Join<Source> crossJoin<Source>(Table<Source> table) =>
         CrossJoin(table);
 
