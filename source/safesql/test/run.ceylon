@@ -35,7 +35,9 @@ import safesql.core {
     insert,
     fromRow,
     Row,
-    desc
+    desc,
+    defaultWhen,
+    inserting
 }
 import safesql.dbc {
     SafeSql
@@ -44,6 +46,7 @@ import safesql.dbc {
 table
 shared class Employee {
     column
+    defaultWhen { inserting }
     shared Key<Employee> id;
 
     column
@@ -142,9 +145,18 @@ shared void run() {
     
     try (ds.connection) {
         try(sql.Transaction()) {
-            qm.doInsert(insert(dev));
+            for (i in 0:10) {
+                value emp = Employee {
+                    id = Key<Employee>(0);
+                    name = "Employee #``i``";
+                    age = 50 + i*6;
+                    salary = 35_000.00;
+                    company = Key<Company>(i);
+                };
+                qm.doInsert(insert(emp));
+            }
         }
-            
+
         try(sql.Transaction()) {
             value results = qm.doSelect(
                 from {
@@ -153,9 +165,6 @@ shared void run() {
                 .where (
                     null
                 )
-                .orderBy {
-                    desc(devs.column(`Employee.age`))
-                }
                 .select(devs)
             );
             

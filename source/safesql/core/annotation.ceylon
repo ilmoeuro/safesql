@@ -42,6 +42,25 @@ shared annotation ColumnAnnotation column(
 )
         => ColumnAnnotation(name);
 
+shared interface DefaultTarget of inserting | updating {
+}
+
+shared object inserting satisfies DefaultTarget {}
+shared object updating satisfies DefaultTarget {}
+
+shared final annotation class DefaultWhenAnnotation(targets)
+    satisfies OptionalAnnotation<
+        DefaultWhenAnnotation,
+        ValueDeclaration
+> {
+    shared {DefaultTarget+} targets;
+}
+
+shared annotation DefaultWhenAnnotation defaultWhen(targets) {
+    {DefaultTarget+} targets;
+    return DefaultWhenAnnotation(targets);
+}
+
 "The annotation class for [[table]] annotation."
 see(`function table`)
 shared final annotation class TableAnnotation(name = "")

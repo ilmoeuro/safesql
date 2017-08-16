@@ -12,18 +12,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import safesql.backend {
-    columnAnnotation,
-    tableAnnotation,
-    columnAttributes
-}
-
 import ceylon.collection {
     ArrayList
 }
 import ceylon.language.meta.model {
     Class,
     Attribute
+}
+
+import safesql.backend {
+    tableAnnotation,
+    columnAttributes,
+    defaultWhenAnnotation
 }
 
 suppressWarnings("unusedDeclaration") // Result is a phantom type parameter
@@ -63,6 +63,11 @@ shared InsertQuery<Insertable> insert<Insertable>(insertable)
     tableAnnotation(type);
     
     for (attribute in columnAttributes(type)) {
+        if (exists annotation = defaultWhenAnnotation(attribute),
+            inserting in annotation.targets) {
+            continue;
+        }
+
         variable Anything val = attribute.bind(insertable).get();
         if (is Key<out Anything, out Object> key = val) {
             val = key.field;

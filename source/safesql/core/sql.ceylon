@@ -20,7 +20,8 @@ import ceylon.language.meta.model {
 import safesql.backend {
     columnAnnotation,
     tableAnnotation,
-    columnAttributes
+    columnAttributes,
+    defaultWhenAnnotation
 }
 
 abstract class SqlEmitter(Anything(String) emit) {
@@ -191,18 +192,12 @@ abstract class SqlEmitter(Anything(String) emit) {
     }
     
     shared void insert(Class<> model) {
-        function inserted(Attribute<> attribute) {
-            return true;
-        } 
-        
         emit("INSERT INTO ");
         bareTableName(model);
 
         emit("(");
 
-        for (i -> attribute in columnAttributes(model)
-                               .filter(inserted)
-                               .indexed) {
+        for (i -> attribute in columnAttributes(model).indexed) {
             if (i != 0) {
                 emit(",");
             }
@@ -211,13 +206,16 @@ abstract class SqlEmitter(Anything(String) emit) {
 
         emit(") VALUES (");
 
-        for (i -> attribute in columnAttributes(model)
-                               .filter(inserted)
-                               .indexed) {
+        for (i -> attribute in columnAttributes(model).indexed) {
             if (i != 0) {
                 emit(",");
             }
-            emit("?");
+            if (exists annotation = defaultWhenAnnotation(attribute),
+                inserting in annotation.targets) {
+                emit("DEFAULT");
+            } else {
+                emit("?");
+            }
         }
 
         emit(")");

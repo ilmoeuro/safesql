@@ -17,12 +17,16 @@ import ceylon.language.meta.model {
     Attribute,
     Class
 }
+
 import safesql.core {
     ColumnAnnotation,
     column,
     TableAnnotation,
     table,
-    Column
+    Column,
+    DefaultWhenAnnotation,
+    defaultWhen,
+    Row
 }
 
 AnnotationType annotationFor<AnnotationType>(target, annotationName)
@@ -36,6 +40,15 @@ AnnotationType annotationFor<AnnotationType>(target, annotationName)
     return annotation;
 }
 
+AnnotationType? optionalAnnotationFor<AnnotationType>(target, annotationName)
+        given AnnotationType satisfies Annotation {
+    Model target;
+    String annotationName;
+    value decl = target.declaration;
+    value annotations = decl.annotations<AnnotationType>();
+    return annotations.first;
+}
+
 "Look up the [[column]] annotation of the given attribute, or throw an error
  if one doesn't exist."
 shared ColumnAnnotation columnAnnotation(Attribute<> attr) =>
@@ -46,6 +59,13 @@ shared ColumnAnnotation columnAnnotation(Attribute<> attr) =>
 shared TableAnnotation tableAnnotation(Class<> cls) =>
         annotationFor<TableAnnotation>(cls, `function table`.qualifiedName);
 
+"Look up the [[defaultWhen]] annotation of the given attribute."
+shared DefaultWhenAnnotation? defaultWhenAnnotation(Attribute<> attr) =>
+        optionalAnnotationFor<DefaultWhenAnnotation>(
+            attr,
+            `function defaultWhen`.qualifiedName
+        );
+
 "Find all the attributes of the class that are annotated with [[column]],
  in alphabetical order."
 shared {Attribute<>*} columnAttributes(Class<> cls) {
@@ -54,10 +74,10 @@ shared {Attribute<>*} columnAttributes(Class<> cls) {
             .sort((a1, a2) => a1.declaration.name <=> a2.declaration.name);
 }
 
-shared class RowImpl<EntityType>(values) {
+shared class RowImpl<EntityType>(values) satisfies Row<EntityType> {
     Map<Attribute<>, Anything> values;
     
-    shared ValueType get<ValueType>(attr) {
+    shared actual ValueType get<ValueType>(attr) {
         Attribute<EntityType, ValueType> attr;
         
         "The returned database row contains a value of wrong type"
@@ -65,6 +85,7 @@ shared class RowImpl<EntityType>(values) {
         return result;
     }
 }
+
 shared String qualifiedColumnAlias<Source, Field>(Column<Source, Field> col) {
     value attr = col.attribute;
     value decl = attr.declaration;
