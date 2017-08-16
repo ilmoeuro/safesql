@@ -29,11 +29,11 @@ shared interface Condition<out Source = Anything>
 }
 
 "The `=` SQL operator"
-shared Condition<Source> _equal<Source, Field>(lhs, rhs) {
+shared Condition<Source> _equal<Source, Field>(lhs, rhs){
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
-    Field rhs;
+    Field&Object rhs;
     return Equal(CovariantColumn(lhs), rhs);
 }
 
@@ -42,7 +42,7 @@ shared Condition<Source> atMost<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
-    Field rhs;
+    Field&Object rhs;
     return AtMost(CovariantColumn(lhs), rhs);
 }
 
@@ -51,7 +51,7 @@ shared Condition<Source> lessThan<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
-    Field rhs;
+    Field&Object rhs;
     return LessThan(CovariantColumn(lhs), rhs);
 }
 
@@ -60,7 +60,7 @@ shared Condition<Source> atLeast<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
-    Field rhs;
+    Field&Object rhs;
     return AtLeast(CovariantColumn(lhs), rhs);
 }
 
@@ -69,7 +69,7 @@ shared Condition<Source> greaterThan<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
-    Field rhs;
+    Field&Object rhs;
     return GreaterThan(CovariantColumn(lhs), rhs);
 }
 
@@ -102,37 +102,37 @@ interface Compare<out Source=Anything, out Field=Anything>
         | GreaterThan<Source, Field>
         satisfies Condition<Source> {
     shared formal CovariantColumn<Source> lhs;
-    shared formal Field rhs;
+    shared formal Field&Object rhs;
 }
 
 class Equal<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
-    shared actual Field rhs;
+    shared actual Field&Object rhs;
 }
 
 class AtMost<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
-    shared actual Field rhs;
+    shared actual Field&Object rhs;
 }
 
 class LessThan<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
-    shared actual Field rhs;
+    shared actual Field&Object rhs;
 }
 
 class AtLeast<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
-    shared actual Field rhs;
+    shared actual Field&Object rhs;
 }
 
 class GreaterThan<out Source=Anything, out Field=Anything>(lhs, rhs)
         satisfies Compare<Source,Field> {
     shared actual CovariantColumn<Source, Field> lhs;
-    shared actual Field rhs;
+    shared actual Field&Object rhs;
 }
 
 interface BinaryCondition<out Source = Anything>

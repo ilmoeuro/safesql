@@ -23,7 +23,7 @@ import ceylon.language.meta.model {
 suppressWarnings("unusedDeclaration") // Result is a phantom type parameter
 shared sealed class InsertQuery<Insertable>(query, params) {
     shared String query;
-    shared {[Anything, Attribute<Nothing,Anything,Nothing>]*} params;
+    shared {[Anything, Attribute<>]*} params;
 
     string => "`` `class`.qualifiedName `` {
                    query=``query``,

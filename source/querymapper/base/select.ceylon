@@ -94,7 +94,7 @@ shared sealed class SelectQuery<Result>(query, params, resultTable) {
     "String representation of the query"
     shared String query;
     "The bundled query parameters that are required by this query."
-    shared {[Anything, Attribute<Nothing,Anything,Nothing>]*} params;
+    shared {[Object, Attribute<Nothing,Anything,Nothing>]*} params;
     "The (aliased) table the result comes from, used for aliased column names."
     shared Table<Result> resultTable;
     
@@ -119,7 +119,7 @@ SelectQuery<Result> selectQuery<Result, Source>(
     {Ordering<Source>*} ordering;
     
     value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<[Anything, Attribute<>]>();
+    value queryParams = ArrayList<[Object, Attribute<>]>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
@@ -138,10 +138,10 @@ SelectQuery<Result> selectQuery<Result, Source>(
     return SelectQuery<Result>(queryBuilder.string, queryParams, columns);
 }
 
-void extractConditionParams<Source>(MutableList<[Anything, Attribute<>]> result, Condition<Source> where) {
+void extractConditionParams<Source>(MutableList<[Object, Attribute<>]> result, Condition<Source> where) {
     switch (where) 
     case (is Compare<Source>) {
-        variable Anything val = where.rhs;
+        variable Object val = where.rhs;
         if (is Key<out Anything, out Object> key = val) {
             val = key.field;
         }
