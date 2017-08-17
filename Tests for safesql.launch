@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.redhat.ceylon.test.eclipse.plugin.ceylonTestLaunchConfigurationType">
+<stringAttribute key="bad_container_name" value="/safesql/testCore.launch"/>
+<listAttribute key="com.redhat.ceylon.test.eclipse.plugin.entries">
+<listEntry value="PROJECT=safesql;MODULE=safesql.test"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="safesql"/>
+</launchConfiguration>
