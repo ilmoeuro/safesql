@@ -16,9 +16,9 @@ native("jvm")
 module safesql.dbc "1.0.0" {
     shared import java.base "8";
     shared import safesql.core "1.0.0";
-    shared import ceylon.dbc "1.3.2";
+    shared import ceylon.dbc "1.3.3";
 
-    import ceylon.interop.java "1.3.2";
-    import ceylon.logging "1.3.2";
+    import ceylon.interop.java "1.3.3";
+    import ceylon.logging "1.3.3";
     import safesql.backend "1.0.0";
 }

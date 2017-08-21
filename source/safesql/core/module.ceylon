@@ -28,6 +28,6 @@ limitations under the License. */
 by("Ilmo Euro <ilmo.euro@gmail.com>")
 license("[ASL 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)")
 module safesql.core "1.0.0" {
-    import ceylon.collection "1.3.2";
+    import ceylon.collection "1.3.3";
     import safesql.backend "1.0.0";
 }

@@ -17,5 +17,5 @@ module safesql.test "1.0.0" {
     shared import safesql.core "1.0.0";
     shared import safesql.dbc "1.0.0";
     shared import maven:"com.h2database":"h2" "1.4.196";
-    import ceylon.test "1.3.2";
+    import ceylon.test "1.3.3";
 }
