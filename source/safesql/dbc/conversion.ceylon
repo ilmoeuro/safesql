@@ -36,8 +36,8 @@ import safesql.core {
 	Key
 }
 
-Object toJdbcObject([Anything, Attribute<>] param) {
-    value [source, attr] = param;
+Object toJdbcObject([Attribute<>, Anything] param) {
+    value [attr, source] = param;
     if (!exists source) {
         // TODO more flexible SqlNulls (eg. varchar/text for Strings)
         if (attr.type == `Integer?`) {
@@ -64,7 +64,7 @@ Object toJdbcObject([Anything, Attribute<>] param) {
         return nativeString(source);
     }
     if (is Key<out Object, out Object> source) {
-        return toJdbcObject([source.field, attr]);
+        return toJdbcObject([attr, source.field]);
     }
     return source;
 }

@@ -68,7 +68,7 @@ class Employee {
 
 Table<Employee> devs = Table("devs", `Employee`);
 
-{[String, {[Object, Attribute<Employee>]*}, SelectQuery<Employee>]*} selectValues = {
+{[String, {[Attribute<Employee>, Object]*}, SelectQuery<Employee>]*} selectValues = {
     [   "SELECT \
          \"devs\".\"id\" AS \"devs.id\",\
          \"devs\".\"name\" AS \"devs.name\",\
@@ -86,7 +86,7 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"Employee\" AS \"devs\" \
          WHERE \
          \"devs\".\"salary\">?"
-    ,     {[10_000.0, `Employee.salary`]}
+    ,     {[`Employee.salary`, 10_000.0]}
     ,   from(devs)
         .where (
             greaterThan(devs.column(`Employee.salary`), 10_000.0)
@@ -101,8 +101,8 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"Employee\" AS \"devs\" \
          WHERE \
          (\"devs\".\"id\"=?) AND (\"devs\".\"name\"=?)"
-    ,   {    [Key<Employee>(0), `Employee.id`]
-        ,    ["example", `Employee.name`]
+    ,   {    [`Employee.id`, Key<Employee>(0)]
+        ,    [`Employee.name`, "example"]
         }
     ,   from(devs)
         .where (
@@ -119,17 +119,17 @@ test
 parameters(`value selectValues`)
 void testSelect(query, params, actual) {
     String query;
-    {[Object, Attribute<Employee>]*} params;
+    {[Attribute<Employee>, Object]*} params;
     SelectQuery<Employee> actual;
     assert ([*params] == [*actual.params]);
     assert (query == actual.query);
 }
 
-{[String, {[Object, Attribute<Employee>]*}, InsertQuery<Employee>]*} insertOneValues = {
+{[String, {[Attribute<Employee>, Anything]*}, InsertQuery<Employee>]*} insertOneValues = {
     [   "INSERT INTO \"Employee\"(\"id\",\"name\",\"salary\") \
          VALUES (DEFAULT,?,?)"
-    ,   {    ["John Doe", `Employee.name`]
-        ,    [50_000.0, `Employee.salary`]
+    ,   {    [`Employee.name`, "John Doe"]
+        ,    [`Employee.salary`, 50_000.0]
         }
     ,   insertOne (
             Employee {
@@ -145,7 +145,7 @@ test
 parameters(`value insertOneValues`)
 void testInsertOne(query, params, actual) {
     String query;
-    {[Object, Attribute<Employee>]*} params;
+    {[Attribute<Employee>, Object]*} params;
     InsertQuery<Employee> actual;
     assert ([*params] == [*actual.params]);
     assert (query == actual.query);

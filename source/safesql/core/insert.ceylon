@@ -29,7 +29,7 @@ import safesql.backend {
 suppressWarnings("unusedDeclaration") // Insertable is a phantom type parameter
 shared sealed class InsertQuery<Insertable>(query, params) {
     shared String query;
-    shared {[Anything, Attribute<>]*} params;
+    shared {[Attribute<>, Anything]*} params;
 
     string => "`` `class`.qualifiedName `` {
                    query=``query``,
@@ -50,7 +50,7 @@ shared InsertQuery<Insertable> insertOne<Insertable>(insertable)
     "The object to be persisted to the database"
     Insertable insertable;
     value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<[Anything, Attribute<>]>();
+    value queryParams = ArrayList<[Attribute<>, Anything]>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
     "`` `function insertOne` `` expects a class type parameter, given `` `Insertable` ``"
@@ -71,7 +71,7 @@ shared InsertQuery<Insertable> insertOne<Insertable>(insertable)
         if (is Key<out Anything, out Object> key = val) {
             val = key.field;
         }
-        queryParams.add([val, attribute]);
+        queryParams.add([attribute, val]);
     }
 
     return InsertQuery<Insertable>(queryBuilder.string, queryParams);
