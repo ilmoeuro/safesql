@@ -27,6 +27,4 @@ void insert<Insertable>(sql, query) {
     value [rows, keys] = sql
                 .Insert(query.query)
                 .execute(*(query.params.map(toJdbcObject)));
-    
-    print([rows, keys]);
 }

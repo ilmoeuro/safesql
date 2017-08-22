@@ -71,7 +71,7 @@ shared class SafeSql(sql, logSql = false) {
     
     "Execute an [[InsertQuery]].
      
-     Use [[safesql.core::insert]] to build the query, and pass it to this
+     Use [[safesql.core::insertOne]] to build the query, and pass it to this
      method to be executed. Example:
      
      ~~~

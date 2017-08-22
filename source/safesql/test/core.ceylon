@@ -13,27 +13,29 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 import ceylon.language.meta.model {
-	Attribute
+    Attribute
 }
 import ceylon.test {
-	test,
-	parameters
+    test,
+    parameters
 }
 
 import safesql.core {
-	table,
-	column,
-	SelectQuery,
-	fromRow,
-	Row,
-	Table,
-	from,
-	greaterThan,
-	defaultWhen,
-	inserting,
-	Key,
-	_and,
-	_equal
+    table,
+    column,
+    SelectQuery,
+    fromRow,
+    Row,
+    Table,
+    from,
+    greaterThan,
+    defaultWhen,
+    inserting,
+    Key,
+    _and,
+    _equal,
+    InsertQuery,
+    insertOne
 }
 
 table
@@ -73,7 +75,7 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"devs\".\"salary\" AS \"devs.salary\" \
          FROM \
          \"Employee\" AS \"devs\""
-    ,	{}
+    ,    {}
     ,   from(devs).where(null).select(devs)
     ]
 ,   [   "SELECT \
@@ -84,7 +86,7 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"Employee\" AS \"devs\" \
          WHERE \
          \"devs\".\"salary\">?"
-    , 	{[10_000.0, `Employee.salary`]}
+    ,     {[10_000.0, `Employee.salary`]}
     ,   from(devs)
         .where (
             greaterThan(devs.column(`Employee.salary`), 10_000.0)
@@ -99,15 +101,15 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"Employee\" AS \"devs\" \
          WHERE \
          (\"devs\".\"id\"=?) AND (\"devs\".\"name\"=?)"
-    , 	{	[Key<Employee>(0), `Employee.id`]
-        ,	["example", `Employee.name`]
-		}
+    ,   {    [Key<Employee>(0), `Employee.id`]
+        ,    ["example", `Employee.name`]
+        }
     ,   from(devs)
         .where (
-        	_and {
-				_equal(devs.column(`Employee.id`), Key<Employee>(0)),
-				_equal(devs.column(`Employee.name`), "example")
-			}
+            _and {
+                _equal(devs.column(`Employee.id`), Key<Employee>(0)),
+                _equal(devs.column(`Employee.name`), "example")
+            }
         )
         .select(devs)
     ]
@@ -116,9 +118,35 @@ Table<Employee> devs = Table("devs", `Employee`);
 test
 parameters(`value selectValues`)
 void testSelect(query, params, actual) {
-	String query;
-	{[Object, Attribute<Employee>]*} params;
-	SelectQuery<Employee> actual;
-	assert ([*params] == [*actual.params]);
+    String query;
+    {[Object, Attribute<Employee>]*} params;
+    SelectQuery<Employee> actual;
+    assert ([*params] == [*actual.params]);
+    assert (query == actual.query);
+}
+
+{[String, {[Object, Attribute<Employee>]*}, InsertQuery<Employee>]*} insertOneValues = {
+    [   "INSERT INTO \"Employee\"(\"id\",\"name\",\"salary\") \
+         VALUES (DEFAULT,?,?)"
+    ,   {    ["John Doe", `Employee.name`]
+        ,    [50_000.0, `Employee.salary`]
+        }
+    ,   insertOne (
+            Employee {
+                id = Key<Employee>(0);
+                name = "John Doe";
+                salary = 50_000.0;
+            }
+        )
+    ]
+};
+
+test
+parameters(`value insertOneValues`)
+void testInsertOne(query, params, actual) {
+    String query;
+    {[Object, Attribute<Employee>]*} params;
+    InsertQuery<Employee> actual;
+    assert ([*params] == [*actual.params]);
     assert (query == actual.query);
 }

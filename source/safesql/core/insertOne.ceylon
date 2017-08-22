@@ -45,7 +45,7 @@ shared sealed class InsertQuery<Insertable>(query, params) {
  from [[insertable]]. The function won't work if [[Insertable]] is something
  else than the actual type of
  [[insertable]] (for example, [[Object]])."
-shared InsertQuery<Insertable> insert<Insertable>(insertable)
+shared InsertQuery<Insertable> insertOne<Insertable>(insertable)
         given Insertable satisfies Object {
     "The object to be persisted to the database"
     Insertable insertable;
@@ -53,7 +53,7 @@ shared InsertQuery<Insertable> insert<Insertable>(insertable)
     value queryParams = ArrayList<[Anything, Attribute<>]>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
-    "`` `function insert` `` expects a class type parameter, given `` `Insertable` ``"
+    "`` `function insertOne` `` expects a class type parameter, given `` `Insertable` ``"
     assert (is Class<> type = `Insertable`);
     emitter.insertInto(type);
     emitter.values(type);
