@@ -191,7 +191,7 @@ abstract class SqlEmitter(Anything(String) emit) {
         }
     }
     
-    shared void insert(Class<> model) {
+    shared void insertInto(Class<> model) {
         emit("INSERT INTO ");
         bareTableName(model);
 
@@ -204,7 +204,11 @@ abstract class SqlEmitter(Anything(String) emit) {
             bareColumnName(attribute);
         }
 
-        emit(") VALUES (");
+        emit(")");
+    }
+    
+    shared void values(Class<> model) {
+        emit(" VALUES (");
 
         for (i -> attribute in columnAttributes(model).indexed) {
             if (i != 0) {

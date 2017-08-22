@@ -142,9 +142,6 @@ void extractConditionParams<Source>(MutableList<[Object, Attribute<>]> result, C
     switch (where) 
     case (is Compare<Source>) {
         variable Object val = where.rhs;
-        if (is Key<out Anything, out Object> key = val) {
-            val = key.field;
-        }
         result.add([val, where.lhs.attribute]);
     }
     case (is BinaryCondition<Source>) {

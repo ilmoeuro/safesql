@@ -26,7 +26,7 @@ import safesql.backend {
     defaultWhenAnnotation
 }
 
-suppressWarnings("unusedDeclaration") // Result is a phantom type parameter
+suppressWarnings("unusedDeclaration") // Insertable is a phantom type parameter
 shared sealed class InsertQuery<Insertable>(query, params) {
     shared String query;
     shared {[Anything, Attribute<>]*} params;
@@ -52,12 +52,11 @@ shared InsertQuery<Insertable> insert<Insertable>(insertable)
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<[Anything, Attribute<>]>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
-    value fnName = `function insert`.name;
-    value insertableName = `Insertable`.string;
 
-    "``fnName`` expects a class type parameter, given ``insertableName``"
+    "`` `function insert` `` expects a class type parameter, given `` `Insertable` ``"
     assert (is Class<> type = `Insertable`);
-    emitter.insert(type);
+    emitter.insertInto(type);
+    emitter.values(type);
     
     // check that `Insertable` is propery annotated
     tableAnnotation(type);

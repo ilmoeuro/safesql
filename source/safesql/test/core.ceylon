@@ -12,22 +12,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
+import ceylon.language.meta.model {
+	Attribute
+}
 import ceylon.test {
-    test,
-    parameters
+	test,
+	parameters
 }
 
 import safesql.core {
-    table,
-    column,
-    SelectQuery,
-    fromRow,
-    Row,
-    Table,
-    from,
-    greaterThan,
-    defaultWhen,
-    inserting
+	table,
+	column,
+	SelectQuery,
+	fromRow,
+	Row,
+	Table,
+	from,
+	greaterThan,
+	defaultWhen,
+	inserting,
+	Key,
+	_and,
+	_equal
 }
 
 table
@@ -35,7 +41,7 @@ class Employee {
     // note the alphabetical order of attributes
     column
     defaultWhen { inserting }
-    shared Integer id;
+    shared Key<Employee> id;
 
     column
     shared String name;
@@ -43,7 +49,7 @@ class Employee {
     column
     shared Float salary;
     
-    shared new(Integer id, String name, Float salary) {
+    shared new(Key<Employee> id, String name, Float salary) {
         this.id = id;
         this.name = name;
         this.salary = salary;
@@ -60,13 +66,14 @@ class Employee {
 
 Table<Employee> devs = Table("devs", `Employee`);
 
-{[String, SelectQuery<Employee>]*} selectValues = {
+{[String, {[Object, Attribute<Employee>]*}, SelectQuery<Employee>]*} selectValues = {
     [   "SELECT \
          \"devs\".\"id\" AS \"devs.id\",\
          \"devs\".\"name\" AS \"devs.name\",\
          \"devs\".\"salary\" AS \"devs.salary\" \
          FROM \
          \"Employee\" AS \"devs\""
+    ,	{}
     ,   from(devs).where(null).select(devs)
     ]
 ,   [   "SELECT \
@@ -77,9 +84,30 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"Employee\" AS \"devs\" \
          WHERE \
          \"devs\".\"salary\">?"
+    , 	{[10_000.0, `Employee.salary`]}
     ,   from(devs)
         .where (
             greaterThan(devs.column(`Employee.salary`), 10_000.0)
+        )
+        .select(devs)
+    ]
+,   [   "SELECT \
+         \"devs\".\"id\" AS \"devs.id\",\
+         \"devs\".\"name\" AS \"devs.name\",\
+         \"devs\".\"salary\" AS \"devs.salary\" \
+         FROM \
+         \"Employee\" AS \"devs\" \
+         WHERE \
+         (\"devs\".\"id\"=?) AND (\"devs\".\"name\"=?)"
+    , 	{	[Key<Employee>(0), `Employee.id`]
+        ,	["example", `Employee.name`]
+		}
+    ,   from(devs)
+        .where (
+        	_and {
+				_equal(devs.column(`Employee.id`), Key<Employee>(0)),
+				_equal(devs.column(`Employee.name`), "example")
+			}
         )
         .select(devs)
     ]
@@ -87,6 +115,10 @@ Table<Employee> devs = Table("devs", `Employee`);
 
 test
 parameters(`value selectValues`)
-void testSelect(String expected, SelectQuery<Employee> actual) {
-    assert (expected == actual.query);
+void testSelect(query, params, actual) {
+	String query;
+	{[Object, Attribute<Employee>]*} params;
+	SelectQuery<Employee> actual;
+	assert ([*params] == [*actual.params]);
+    assert (query == actual.query);
 }
