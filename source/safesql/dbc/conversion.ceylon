@@ -12,26 +12,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import java.sql {
-    Types
-}
-import safesql.core {
-    Key
-}
-import java.lang {
-    JLong=Long,
-    JDouble=Double
-}
-import ceylon.interop.java {
-    javaString
+import ceylon.dbc {
+	SqlNull
 }
 import ceylon.language.meta.model {
-    Attribute,
-    Type,
-    Class
+	Attribute,
+	Type,
+	Class
 }
-import ceylon.dbc {
-    SqlNull
+
+import java.lang {
+	JLong=Long,
+	JDouble=Double,
+	Types {
+		nativeString
+	}
+}
+import java.sql {
+	SqlTypes=Types
+}
+
+import safesql.core {
+	Key
 }
 
 Object toJdbcObject([Anything, Attribute<>] param) {
@@ -39,18 +41,18 @@ Object toJdbcObject([Anything, Attribute<>] param) {
     if (!exists source) {
         // TODO more flexible SqlNulls (eg. varchar/text for Strings)
         if (attr.type == `Integer?`) {
-            return SqlNull(Types.integer);
+            return SqlNull(SqlTypes.integer);
         }
         if (attr.type == `String?`) {
-            return SqlNull(Types.varchar);
+            return SqlNull(SqlTypes.varchar);
         }
         if (attr.type == `Float?`) {
-            return SqlNull(Types.double);
+            return SqlNull(SqlTypes.double);
         }
         if (attr.type.subtypeOf(`Key<out Anything, out Object>?`)) {
-            return SqlNull(Types.integer);
+            return SqlNull(SqlTypes.integer);
         }
-        return SqlNull(Types.binary);
+        return SqlNull(SqlTypes.binary);
     }
     if (is Integer source) {
         return JLong(source);
@@ -59,7 +61,10 @@ Object toJdbcObject([Anything, Attribute<>] param) {
         return JDouble(source);
     }
     if (is String source) {
-        return javaString(source);
+        return nativeString(source);
+    }
+    if (is Key<out Object, out Object> source) {
+        return toJdbcObject([source.field, attr]);
     }
     return source;
 }
