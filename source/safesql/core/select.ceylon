@@ -94,14 +94,14 @@ shared sealed class OrderBy<Source>(source, joins, condition, ordering) {
 see(`function from`)
 shared sealed class SelectQuery<Result>(query, params, resultTable) {
     "String representation of the query"
-    shared String query;
+    shared String query(Dialect dialect);
     "The bundled query parameters that are required by this query."
     shared {SelectQueryParameter*} params;
     "The (aliased) table the result comes from, used for aliased column names."
     shared Table<Result> resultTable;
     
     string => "`` `class`.qualifiedName `` {
-                   query=``query``,
+                   query(h2)=``query(Dialect.h2)``,
                    params=``params``,
                    resultTable=``resultTable``
                }";
@@ -132,7 +132,11 @@ SelectQuery<Result> selectQuery<Result, Source>(
         emitter.orderBy(ordering);
     }
     
-    return SelectQuery<Result>(queryBuilder.string, queryParams, columns);
+    return SelectQuery<Result> {
+        query(Dialect _) => queryBuilder.string;
+        params = queryParams;
+        resultTable = columns;
+    };
 }
 
 void extractConditionParams<Source>(result, where) {

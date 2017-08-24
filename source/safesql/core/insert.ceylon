@@ -30,11 +30,11 @@ shared alias InsertQueryParameter => [Attribute<>, Anything];
 
 suppressWarnings("unusedDeclaration") // Insertable is a phantom type parameter
 shared sealed class InsertQuery<Insertable>(query, params) {
-    shared String query;
+    shared String query(Dialect dialect);
     shared {InsertQueryParameter*} params;
 
     string => "`` `class`.qualifiedName `` {
-                   query=``query``,
+                   query(h2)=``query(Dialect.h2) ``,
                    params=``params``
                }";
 }
@@ -73,5 +73,8 @@ shared InsertQuery<Insertable> insertOne<Insertable>(insertable)
         queryParams.add([attribute, val]);
     }
 
-    return InsertQuery<Insertable>(queryBuilder.string, queryParams);
+    return InsertQuery<Insertable> {
+        query(Dialect _) => queryBuilder.string;
+        params = queryParams;
+    };
 }

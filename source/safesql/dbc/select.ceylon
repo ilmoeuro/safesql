@@ -12,12 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import safesql.backend {
-    columnAttributes,
-    RowImpl,
-    qualifiedColumnAlias
-}
-
 import ceylon.dbc {
     Sql
 }
@@ -27,20 +21,27 @@ import ceylon.language.meta.model {
     CallableConstructor
 }
 
+import safesql.backend {
+    columnAttributes,
+    RowImpl,
+    qualifiedColumnAlias
+}
 import safesql.core {
     Row,
     FromRowAnnotation,
     fromRow,
-    SelectQuery
+    SelectQuery,
+    Dialect
 }
 
-{Result*} select<Result>(sql, query) {
+{Result*} select<Result>(dialect, sql, query) {
+    Dialect dialect;
     Sql sql;
     SelectQuery<Result> query;
     
     value columns = query.resultTable;
     value rows = sql
-                .Select(query.query)
+                .Select(query.query(dialect))
                 .execute(*(query.params.map(toJdbcObject)));
 
     assert (is Class<> model = `Result`);

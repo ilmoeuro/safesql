@@ -12,9 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import ceylon.language.meta.model {
-    Attribute
-}
 import ceylon.test {
     test,
     parameters
@@ -40,7 +37,11 @@ import safesql.core {
     UpdateQuery,
     updateOne,
     InsertQueryParameter,
-    SelectQueryParameter
+    SelectQueryParameter,
+    Dialect {
+        h2
+    },
+    UpdateQueryParameter
 }
 
 table
@@ -126,10 +127,10 @@ test
 parameters(`value selectValues`)
 void testSelect(query, params, actual) {
     String query;
-    {[Attribute<Employee>, Object]*} params;
+    {SelectQueryParameter*} params;
     SelectQuery<Employee> actual;
     assert ([*params] == [*actual.params]);
-    assert (query == actual.query);
+    assert (query == actual.query(h2));
 }
 
 {[String, {InsertQueryParameter*}, InsertQuery<Employee>]*} insertOneValues = {
@@ -152,13 +153,13 @@ test
 parameters(`value insertOneValues`)
 void testInsertOne(query, params, actual) {
     String query;
-    {[Attribute<Employee>, Object]*} params;
+    {InsertQueryParameter*} params;
     InsertQuery<Employee> actual;
     assert ([*params] == [*actual.params]);
-    assert (query == actual.query);
+    assert (query == actual.query(h2));
 }
 
-{[String, {[Attribute<Employee>, Anything]*}, UpdateQuery<Employee>]*} updateOneValues = {
+{[String, {UpdateQueryParameter*}, UpdateQuery<Employee>]*} updateOneValues = {
     [   "UPDATE \"Employee\" \
          SET \"name\"=?,\"salary\"=? \
          WHERE \"id\"=?"
@@ -180,8 +181,8 @@ test
 parameters(`value updateOneValues`)
 void testUpdateOne(query, params, actual) {
     String query;
-    {[Attribute<Employee>, Object]*} params;
+    {UpdateQueryParameter*} params;
     UpdateQuery<Employee> actual;
     assert ([*params] == [*actual.params]);
-    assert (query == actual.query);
+    assert (query == actual.query(h2));
 }

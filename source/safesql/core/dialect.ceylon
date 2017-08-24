@@ -12,21 +12,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-import ceylon.dbc {
-    Sql
-}
-
-import safesql.core {
-    InsertQuery,
-    Dialect
-}
-
-void insert<Insertable>(dialect, sql, query) {
-    Dialect dialect;
-    Sql sql;
-    InsertQuery<Insertable> query;
-
-    value [rows, keys] = sql
-                .Insert(query.query(dialect))
-                .execute(*(query.params.map(toJdbcObject)));
+shared class Dialect of h2 | postgresql {
+    String name;
+    
+    abstract new named(name) {
+        String name;
+        this.name = name;
+    }
+        
+    shared new h2           extends named("h2") {}
+    shared new postgresql   extends named("postgresql") {}
+    
+    string => name;
 }

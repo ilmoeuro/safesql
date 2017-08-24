@@ -31,11 +31,11 @@ shared alias UpdateQueryParameter => [Attribute<>, Anything];
 
 suppressWarnings("unusedDeclaration") // Updatable is a phantom type parameter
 shared sealed class UpdateQuery<Updatable>(query, params) {
-    shared String query;
+    shared String query(Dialect dialect);
     shared {UpdateQueryParameter*} params;
 
     string => "`` `class`.qualifiedName `` {
-                   query=``query``,
+                   query(h2)=``query(Dialect.h2)``,
                    params=``params``
                }";
 }
@@ -86,5 +86,8 @@ shared UpdateQuery<Updatable> updateOne<Updatable>(updatable)
         }
     }
 
-    return UpdateQuery<Updatable>(queryBuilder.string, queryParams);
+    return UpdateQuery<Updatable> {
+        query(Dialect _) => queryBuilder.string;
+        params = queryParams;
+    };
 }

@@ -22,15 +22,17 @@ import ceylon.logging {
 
 import safesql.core {
     SelectQuery,
-    InsertQuery
+    InsertQuery,
+    Dialect
 }
 
 Logger log = logger(`module`);
 
-shared class SafeSql(sql, logSql = false) {
+shared class SafeSql(sql, dialect, logSql = false) {
     "The [[Sql]] object used to connect to the database and execute queries. You
      can mix [[Sql]] and [[SafeSql]] queries freely."
     Sql sql;
+    Dialect dialect;
     "Log the generated SQL using `ceylon.logging`"
     Boolean logSql;
     
@@ -65,8 +67,8 @@ shared class SafeSql(sql, logSql = false) {
     shared {Result*} doSelect<Result>(query) {
         "The query to execute."
         SelectQuery<Result> query;
-        logIfEnabled(query.query);
-        return select(sql, query);
+        logIfEnabled(query.query(dialect));
+        return select(dialect, sql, query);
     }
     
     "Execute an [[InsertQuery]].
@@ -83,7 +85,7 @@ shared class SafeSql(sql, logSql = false) {
      ~~~"
     shared void doInsert<Insertable>(query) {
         InsertQuery<Insertable> query;
-        logIfEnabled(query.query);
-        insert(sql, query);
+        logIfEnabled(query.query(dialect));
+        insert(dialect, sql, query);
     }
 }
