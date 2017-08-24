@@ -21,7 +21,8 @@ import safesql.backend {
     columnAnnotation,
     tableAnnotation,
     columnAttributes,
-    defaultWhenAnnotation
+    defaultWhenAnnotation,
+    primaryKeyAnnotation
 }
 
 abstract class SqlEmitter(Anything(String) emit) {
@@ -223,6 +224,39 @@ abstract class SqlEmitter(Anything(String) emit) {
         }
 
         emit(")");
+    }
+    
+    shared void updateOne(Class<> model) {
+        emit("UPDATE ");
+        bareTableName(model);
+
+        emit(" SET ");
+        value attributes = columnAttributes(model)
+            .filter((attr) => !primaryKeyAnnotation(attr) exists);
+        for (i -> attribute in attributes.indexed) {
+            if (i != 0) {
+                emit(",");
+            }
+
+            bareColumnName(attribute);
+            emit("=");
+            if (exists annotation = defaultWhenAnnotation(attribute),
+                updating in annotation.targets) {
+                emit("DEFAULT");
+            } else {
+                emit("?");
+            }
+        }
+        
+        emit(" WHERE ");
+        value pkAttributes = columnAttributes(model)
+            .filter((attr) => primaryKeyAnnotation(attr) exists)
+            .sequence();
+        "`` `function updateOne` `` requires exactly one \
+         attribute annotated `` `function primaryKey` ``"
+        assert (exists pkAttribute = pkAttributes[0]);
+        bareColumnName(pkAttribute);
+        emit("=?");
     }
 }
 

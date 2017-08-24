@@ -92,7 +92,7 @@ shared final annotation class FromRowAnnotation()
 > {
 }
 
-"The annotation for the no-arg constructor that builds the object from a database row.
+"The annotation for the constructor that builds the object from a database row.
  
  If you want to retrieve objects using a [[from]] query, annotate one
  constructor with this annotation. The constructor **must** have one argument, a
@@ -121,3 +121,14 @@ shared final annotation class FromRowAnnotation()
  ~~~
  "
 shared annotation FromRowAnnotation fromRow() => FromRowAnnotation();
+
+"The annotation class for [[primaryKey]] annotation."
+see(`function primaryKey`)
+shared final annotation class PrimaryKeyAnnotation()
+    satisfies OptionalAnnotation<
+        PrimaryKeyAnnotation,
+        ValueDeclaration
+> {
+}
+
+shared annotation PrimaryKeyAnnotation primaryKey() => PrimaryKeyAnnotation();

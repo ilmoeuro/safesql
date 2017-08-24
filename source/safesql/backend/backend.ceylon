@@ -26,24 +26,23 @@ import safesql.core {
     Column,
     DefaultWhenAnnotation,
     defaultWhen,
-    Row
+    Row,
+    PrimaryKeyAnnotation,
+    primaryKey
 }
 
 AnnotationType annotationFor<AnnotationType>(target, annotationName)
         given AnnotationType satisfies Annotation {
     Model target;
     String annotationName;
-    value decl = target.declaration;
-    value annotations = decl.annotations<AnnotationType>();
     "``target`` must be annotated with ``annotationName``"
-    assert(exists annotation = annotations.first);
+    assert(exists annotation = optionalAnnotationFor<AnnotationType>(target));
     return annotation;
 }
 
-AnnotationType? optionalAnnotationFor<AnnotationType>(target, annotationName)
+AnnotationType? optionalAnnotationFor<AnnotationType>(target)
         given AnnotationType satisfies Annotation {
     Model target;
-    String annotationName;
     value decl = target.declaration;
     value annotations = decl.annotations<AnnotationType>();
     return annotations.first;
@@ -61,10 +60,11 @@ shared TableAnnotation tableAnnotation(Class<> cls) =>
 
 "Look up the [[defaultWhen]] annotation of the given attribute."
 shared DefaultWhenAnnotation? defaultWhenAnnotation(Attribute<> attr) =>
-        optionalAnnotationFor<DefaultWhenAnnotation>(
-            attr,
-            `function defaultWhen`.qualifiedName
-        );
+        optionalAnnotationFor<DefaultWhenAnnotation>(attr);
+
+"Look up the [[primaryKey]] annotation of the given attribute."
+shared PrimaryKeyAnnotation? primaryKeyAnnotation(Attribute<> attr) =>
+        optionalAnnotationFor<PrimaryKeyAnnotation>(attr);
 
 "Find all the attributes of the class that are annotated with [[column]],
  in alphabetical order."

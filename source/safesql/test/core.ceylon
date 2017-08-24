@@ -35,21 +35,27 @@ import safesql.core {
     _and,
     _equal,
     InsertQuery,
-    insertOne
+    insertOne,
+    primaryKey,
+    UpdateQuery,
+    updateOne,
+    InsertQueryParameter,
+    SelectQueryParameter
 }
 
 table
 class Employee {
     // note the alphabetical order of attributes
     column
+    primaryKey
     defaultWhen { inserting }
     shared Key<Employee> id;
 
     column
-    shared String name;
+    shared String? name;
 
     column
-    shared Float salary;
+    shared Float? salary;
     
     shared new(Key<Employee> id, String name, Float salary) {
         this.id = id;
@@ -68,14 +74,14 @@ class Employee {
 
 Table<Employee> devs = Table("devs", `Employee`);
 
-{[String, {[Attribute<Employee>, Object]*}, SelectQuery<Employee>]*} selectValues = {
+{[String, {SelectQueryParameter*}, SelectQuery<Employee>]*} selectValues = {
     [   "SELECT \
          \"devs\".\"id\" AS \"devs.id\",\
          \"devs\".\"name\" AS \"devs.name\",\
          \"devs\".\"salary\" AS \"devs.salary\" \
          FROM \
          \"Employee\" AS \"devs\""
-    ,    {}
+    ,   {}
     ,   from(devs).where(null).select(devs)
     ]
 ,   [   "SELECT \
@@ -86,7 +92,8 @@ Table<Employee> devs = Table("devs", `Employee`);
          \"Employee\" AS \"devs\" \
          WHERE \
          \"devs\".\"salary\">?"
-    ,     {[`Employee.salary`, 10_000.0]}
+    ,   {   [`Employee.salary`, 10_000.0]
+        }
     ,   from(devs)
         .where (
             greaterThan(devs.column(`Employee.salary`), 10_000.0)
@@ -125,11 +132,11 @@ void testSelect(query, params, actual) {
     assert (query == actual.query);
 }
 
-{[String, {[Attribute<Employee>, Anything]*}, InsertQuery<Employee>]*} insertOneValues = {
+{[String, {InsertQueryParameter*}, InsertQuery<Employee>]*} insertOneValues = {
     [   "INSERT INTO \"Employee\"(\"id\",\"name\",\"salary\") \
          VALUES (DEFAULT,?,?)"
-    ,   {    [`Employee.name`, "John Doe"]
-        ,    [`Employee.salary`, 50_000.0]
+    ,   {   [`Employee.name`, "John Doe"]
+        ,   [`Employee.salary`, 50_000.0]
         }
     ,   insertOne (
             Employee {
@@ -147,6 +154,34 @@ void testInsertOne(query, params, actual) {
     String query;
     {[Attribute<Employee>, Object]*} params;
     InsertQuery<Employee> actual;
+    assert ([*params] == [*actual.params]);
+    assert (query == actual.query);
+}
+
+{[String, {[Attribute<Employee>, Anything]*}, UpdateQuery<Employee>]*} updateOneValues = {
+    [   "UPDATE \"Employee\" \
+         SET \"name\"=?,\"salary\"=? \
+         WHERE \"id\"=?"
+    ,   {   [`Employee.name`, "John Doe"]
+        ,   [`Employee.salary`, 50_000.0]
+        ,   [`Employee.id`, Key<Employee>(0)]
+        }
+    ,   updateOne (
+            Employee {
+                id = Key<Employee>(0);
+                name = "John Doe";
+                salary = 50_000.0;
+            }
+        )
+    ]
+};
+
+test
+parameters(`value updateOneValues`)
+void testUpdateOne(query, params, actual) {
+    String query;
+    {[Attribute<Employee>, Object]*} params;
+    UpdateQuery<Employee> actual;
     assert ([*params] == [*actual.params]);
     assert (query == actual.query);
 }

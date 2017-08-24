@@ -20,6 +20,8 @@ import ceylon.language.meta.model {
     Attribute
 }
 
+shared alias SelectQueryParameter => [Attribute<>, Object];
+
 "The entry point to a `SELECT` query, builds the `FROM` clause of the query.
  
  The `FROM` clause is **first**, because it then determines the table types
@@ -94,7 +96,7 @@ shared sealed class SelectQuery<Result>(query, params, resultTable) {
     "String representation of the query"
     shared String query;
     "The bundled query parameters that are required by this query."
-    shared {[Attribute<>, Object]*} params;
+    shared {SelectQueryParameter*} params;
     "The (aliased) table the result comes from, used for aliased column names."
     shared Table<Result> resultTable;
     
@@ -106,20 +108,15 @@ shared sealed class SelectQuery<Result>(query, params, resultTable) {
 }
 
 SelectQuery<Result> selectQuery<Result, Source>(
-    columns,
-    source,
-    joins,
-    condition = null,
-    ordering = {}
+    Table<Result> columns,
+    Table<Source> source,
+    {Join<Source>*} joins,
+    Condition<Source>? condition = null,
+    {Ordering<Source>*} ordering = {}
 ) given Result satisfies Source {
-    Table<Result> columns;
-    Table<Source> source;
-    {Join<Source>*} joins;
-    Condition<Source>? condition;
-    {Ordering<Source>*} ordering;
     
     value queryBuilder = StringBuilder();
-    value queryParams = ArrayList<[Attribute<>, Object]>();
+    value queryParams = ArrayList<SelectQueryParameter>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
     emitter.select(columns);
@@ -138,7 +135,9 @@ SelectQuery<Result> selectQuery<Result, Source>(
     return SelectQuery<Result>(queryBuilder.string, queryParams, columns);
 }
 
-void extractConditionParams<Source>(MutableList<[Attribute<>, Object]> result, Condition<Source> where) {
+void extractConditionParams<Source>(result, where) {
+    MutableList<SelectQueryParameter> result;
+    Condition<Source> where;
     switch (where) 
     case (is Compare<Source>) {
         variable Object val = where.rhs;
