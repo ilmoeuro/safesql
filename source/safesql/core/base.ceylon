@@ -84,7 +84,15 @@ shared sealed class Column<out Source=Anything, Field = Anything>(table, attribu
     shared Attribute<Nothing, Field> attribute;
 }
 
+"A database row that contains the attribute values required to construct
+ an [[EntityType]]. Values of this type are passed to the constructor
+ annotated with [[fromRow]].
+ "
 shared interface Row<EntityType> {
+    
+    "Retrieve the value for the given attribute from the database row.
+     The column used as the source of the value is determined by the
+     name of the attribute and possible [[column]] annotation."
     shared formal ValueType get<ValueType>(
         Attribute<EntityType, ValueType> attr
     );
