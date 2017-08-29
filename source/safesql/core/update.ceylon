@@ -48,24 +48,27 @@ shared sealed class UpdateQuery<Updatable>(query, params) {
  from [[updatable]]. The function won't work if [[Updatable]] is something
  else than the actual type of
  [[updatable]] (for example, [[Object]])."
-shared UpdateQuery<Updatable> updateOne<Updatable>(updatable)
+shared UpdateQuery<Updatable> updateOne<Updatable>(updatable, fields)
         given Updatable satisfies Object {
     "The object to be persisted to the database"
     Updatable updatable;
+    Attribute<Updatable>* fields;
+    
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<UpdateQueryParameter>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
     "`` `function insertOne` `` expects a class type parameter, given `` `Updatable` ``"
     assert (is Class<> type = `Updatable`);
-    emitter.updateOne(type);
+    value attributes = columnAttributes(type);
+    value fieldAttributes = if (fields.empty) then attributes else fields;
+
+    emitter.updateOne(type, fieldAttributes);
     
     // check that `Insertable` is propery annotated
     tableAnnotation(type);
     
-    value attributes = columnAttributes(type);
-    
-    for (attribute in attributes) {
+    for (attribute in fieldAttributes) {
         if (exists annotation = defaultWhenAnnotation(attribute),
             updating in annotation.targets) {
             continue;

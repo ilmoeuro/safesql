@@ -226,12 +226,12 @@ abstract class SqlEmitter(Anything(String) emit) {
         emit(")");
     }
     
-    shared void updateOne(Class<> model) {
+    shared void updateOne(Class<> model, {Attribute<>*} fields) {
         emit("UPDATE ");
         bareTableName(model);
 
         emit(" SET ");
-        value attributes = columnAttributes(model)
+        value attributes = (fields else columnAttributes(model))
             .filter((attr) => !primaryKeyAnnotation(attr) exists);
         for (i -> attribute in attributes.indexed) {
             if (i != 0) {
