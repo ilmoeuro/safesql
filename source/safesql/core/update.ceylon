@@ -29,6 +29,9 @@ import safesql.backend {
 
 shared alias UpdateQueryParameter => [Attribute<>, Anything];
 
+"An `UPDATE` query.
+ 
+ Use [[updateOne]] to build instances of this class."
 suppressWarnings("unusedDeclaration") // Updatable is a phantom type parameter
 shared sealed class UpdateQuery<Updatable>(query, params) {
     shared String query(Dialect dialect);
@@ -42,23 +45,26 @@ shared sealed class UpdateQuery<Updatable>(query, params) {
 
 "Construct an `UPDATE` query that persists [[updatable]] to the database.
  
- [[Updatable]] **must** be a class, and annotated [[table]]. It's scanned for
- attributes annotated with [[column]], and each one of them is used a as a
- column in the `UPDATE` query. The actual values for the columns are retrieved
- from [[updatable]]. The function won't work if [[Updatable]] is something
- else than the actual type of
+ [[Updatable]] **must** be a class, and annotated [[table]]. If specified, the
+ attributes specified in [[fields]] are used as columns in the `UPDATE` query.
+ If no attributes are specified, all the attributes annotated [[column]] are
+ used. The actual values for the columns are retrieved from [[updatable]]. The
+ function won't work if [[Updatable]] is something else than the actual type of
  [[updatable]] (for example, [[Object]])."
 shared UpdateQuery<Updatable> updateOne<Updatable>(updatable, fields)
         given Updatable satisfies Object {
     "The object to be persisted to the database"
     Updatable updatable;
+    "The attributes to be persisted as database columns. If no attributes are
+     specified, all attributes annotated [[column]] are used."
     Attribute<Updatable>* fields;
     
     value queryBuilder = StringBuilder();
     value queryParams = ArrayList<UpdateQueryParameter>();
     value emitter = PgH2SqlEmitter(queryBuilder.append);
 
-    "`` `function insertOne` `` expects a class type parameter, given `` `Updatable` ``"
+    "`` `function insertOne` `` expects a class type parameter, \
+     given `` `Updatable` ``"
     assert (is Class<> type = `Updatable`);
     value attributes = columnAttributes(type);
     value fieldAttributes = if (fields.empty) then attributes else fields;

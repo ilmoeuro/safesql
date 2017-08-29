@@ -175,6 +175,21 @@ void testInsertOne(query, params, actual) {
             }
         )
     ]
+,   [   "UPDATE \"Employee\" \
+         SET \"name\"=? \
+         WHERE \"id\"=?"
+    ,   {   [`Employee.name`, "John Doe"]
+        ,   [`Employee.id`, Key<Employee>(0)]
+        }
+    ,   updateOne (
+            Employee {
+                id = Key<Employee>(0);
+                name = "John Doe";
+                salary = 50_000.0;
+            },
+            `Employee.name`
+        )
+    ]
 };
 
 test

@@ -23,7 +23,8 @@ import ceylon.logging {
 import safesql.core {
     SelectQuery,
     InsertQuery,
-    Dialect
+    Dialect,
+    UpdateQuery
 }
 
 Logger log = logger(`module`);
@@ -87,5 +88,23 @@ shared class SafeSql(sql, dialect, logSql = false) {
         InsertQuery<Insertable> query;
         logIfEnabled(query.query(dialect));
         insert(dialect, sql, query);
+    }
+
+    "Execute an [[UpdateQuery]].
+     
+     Use [[safesql.core::insertOne]] to build the query, and pass it to this
+     method to be executed. Example:
+     
+     ~~~
+     Employee employee = /* ... */;
+     
+     value qm = QueryMapper(sql);
+     
+     qm.doInsert(insert(employee));
+     ~~~"
+    shared void doUpdate<Updatable>(query) {
+        UpdateQuery<Updatable> query;
+        logIfEnabled(query.query(dialect));
+        update(dialect, sql, query);
     }
 }

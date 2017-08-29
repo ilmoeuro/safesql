@@ -67,9 +67,9 @@ shared final class Table<out Source=Anything>(name, cls) {
 
 "An aliased database column to be used in queries.
  
- All column names are based on [[Table]] aliases - there is no bare columns.
- The class is [[sealed]], so names can only be created using the
- [[Table.column]] method.
+ All column names are based on [[Table]] aliases - there is no bare columns. The
+ class is [[sealed]], so names can only be created using the [[Table.column]]
+ method.
  
  Typical usage:
  
