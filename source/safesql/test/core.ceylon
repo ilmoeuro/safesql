@@ -18,22 +18,15 @@ import ceylon.test {
 }
 
 import safesql.core {
-    table,
-    column,
     SelectQuery,
-    fromRow,
-    Row,
     Table,
     from,
     greaterThan,
-    defaultWhen,
-    inserting,
     Key,
     _and,
     _equal,
     InsertQuery,
     insertOne,
-    primaryKey,
     UpdateQuery,
     updateOne,
     InsertQueryParameter,
@@ -42,35 +35,6 @@ import safesql.core {
         h2
     },
     UpdateQueryParameter
-}
-
-table
-class Employee {
-    // note the alphabetical order of attributes
-    column
-    primaryKey
-    defaultWhen { inserting }
-    shared Key<Employee> id;
-
-    column
-    shared String? name;
-
-    column
-    shared Float? salary;
-    
-    shared new(Key<Employee> id, String name, Float salary) {
-        this.id = id;
-        this.name = name;
-        this.salary = salary;
-    }
-    
-    suppressWarnings("unusedDeclaration")
-    fromRow
-    new fromRow(Row<Employee> row) {
-        id = row.get(`id`);
-        name = row.get(`name`);
-        salary = row.get(`salary`);
-    }
 }
 
 Table<Employee> devs = Table("devs", `Employee`);
