@@ -34,6 +34,14 @@ Boolean nullSafeEquals(Anything a, Anything b) {
     }
 }
 
+Integer makeHash(Anything* vals) {
+    variable value hash = 1;
+    for (val in vals) {
+        hash = hash * 31 + (val?.hash else 0);
+    }
+    return hash;
+}
+
 table
 class Employee extends Object {
     
@@ -81,13 +89,7 @@ class Employee extends Object {
         else 
             false;
     
-    shared actual Integer hash {
-        variable value hash = 1;
-        hash = 31*hash + id.hash;
-        hash = 31*hash + (name?.hash else 0);
-        hash = 31*hash + (salary?.hash else 0);
-        return hash;
-    }
+    hash => makeHash(id, name, salary);
     
     string => "`` `class` `` {
                    id = `` id ``,
