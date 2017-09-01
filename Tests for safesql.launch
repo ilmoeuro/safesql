@@ -4,6 +4,12 @@
 <listAttribute key="com.redhat.ceylon.test.eclipse.plugin.entries">
 <listEntry value="PROJECT=safesql;MODULE=safesql.test"/>
 </listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/safesql"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
 </listAttribute>

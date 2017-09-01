@@ -23,23 +23,10 @@ import safesql.core {
     column,
     Table
 }
-
-Boolean nullSafeEquals(Anything a, Anything b) {
-    if (exists a, exists b) {
-        return a == b;
-    } else if (!exists a, !exists b) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-Integer makeHash(Anything* vals) {
-    variable value hash = 1;
-    for (val in vals) {
-        hash = hash * 31 + (val?.hash else 0);
-    }
-    return hash;
+import safesql.helpers {
+    reflectionEquals,
+    compositeHash,
+    reflectionString
 }
 
 table
@@ -81,21 +68,11 @@ class Employee extends Object {
         salary = row.get(`salary`);
     }
 
-    equals(Object that) =>
-        if (is Employee that) then
-            id == that.id &&
-            nullSafeEquals(name, that.name) &&
-            nullSafeEquals(salary, that.salary)
-        else 
-            false;
+    equals(Object that) => reflectionEquals(this, that, `id`, `name`, `salary`);
     
-    hash => makeHash(id, name, salary);
+    hash => compositeHash(id, name, salary);
     
-    string => "`` `class` `` {
-                   id = `` id ``,
-                   name = `` name else "<null>" ``,
-                   salary = `` salary else "<null>" ``
-                }";
+    string => reflectionString(this, `id`, `name`, `salary`);
 }
 
 Table<Employee> employees = Table("employees", `Employee`);
