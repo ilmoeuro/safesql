@@ -16,28 +16,33 @@ import ceylon.language.meta.model {
     Attribute
 }
 
-"Use reflection to determine if two objects are of compatible types and have equal
- attribute values. Returns [[true]] if [[me]] and [[it]] are both of type [[T]], and each
- attribute in [[attrs]] has equal value for [[me]] and [[it]], or both values are
- [[null]].
+"Determine if two objects are of compatible types and have equal attribute values. Returns
+ [[true]] if:
  
+  - [[me]] and [[it]] are of the same type
+  - Each getter in [[getters]] produce equal values for both [[me]] and [[it]], or both
+    produce `null`.
  
  This function is meant to be used as the implementation for [[Object.equals]], like this:
  
  ~~~
- equals(Object that) => reflectionEquals(this, that, `attr1`, `attr2`, `attr3`);
+ class MyClass() {
+     // ...
+     equals(Object that) => structuralEquals(this, that, MyClass.attr1, MyClass.attr2);
+     // ...
+ }
  ~~~"
-shared Boolean reflectionEquals<T>(me, it, attrs) {
+shared Boolean structuralEquals<T>(me, it, getters) {
     "The reference object for equality comparison"
     T me;
     "The object to compare to the reference object"
     Object it;
-    "The attributes that are included in equality comparison"
-    Attribute<T>+ attrs;
+    "The getters for attribute values that are used in equality comparison."
+    Anything(T)+ getters;
     if (is T it) {
-        for (attr in attrs) {
-            Anything mine = attr.bind(me).get();
-            Anything its = attr.bind(it).get();
+        for (getter in getters) {
+            Anything mine = getter(me);
+            Anything its = getter(it);
             if (exists mine, exists its, mine != its) {
                 return false;
             }
@@ -52,6 +57,33 @@ shared Boolean reflectionEquals<T>(me, it, attrs) {
     } else {
         return false;
     }
+}
+
+"Use the metamodel to determine if two objects are of compatible types and have equal
+ attribute values. Returns [[true]] if:
+ 
+  - [[me]] and [[it]] are of the same type
+  - Each attribute in [[attrs]] has equal values for both [[me]] and [[it]], or both
+    values are `null`.
+ 
+ This function is meant to be used as the implementation for [[Object.equals]], like this:
+ 
+ ~~~
+ equals(Object that) => reflectionEquals(this, that, `attr1`, `attr2`);
+ ~~~"
+shared Boolean metamodelEquals<T>(me, it, attrs) {
+    "The reference object for equality comparison"
+    T me;
+    "The object to compare to the reference object"
+    Object it;
+    "The attribute values that are used in equality comparison."
+    Attribute<T>+ attrs;
+    
+    function toGetter(Attribute<T> attr) {
+        return (T obj) => attr.bind(obj).get();
+    }
+    
+    return structuralEquals(me, it, *attrs.map(toGetter));
 }
 
 "Calculate a combined hash for [[values]]. [[null]]s are hashed as 0.
@@ -69,12 +101,12 @@ shared Integer compositeHash(Anything+ values) {
     return result;
 }
 
-"Use reflection to construct a developer-friendly string representation of an instance.
+"Use the metamodel to construct a developer-friendly string representation of an instance.
  The string is constructed from the fully qualified name of [[T]] and the name-value pairs
  of [[attrs]], in the following form:
  
  ~~~
- T{attr1=value1;attr2=value2;attr3=value3;}
+ moduleName::T{attr1=value1;attr2=value2;attr3=value3;}
  ~~~
  
  This function is meant to be used as the implementation for [[Object.string]], like this:
@@ -82,7 +114,7 @@ shared Integer compositeHash(Anything+ values) {
  ~~~
  string => reflectionString(this, `attr1`, `attr2`, `attr3`);
  ~~~"
-shared String reflectionString<T>(T me, Attribute<T>+ attrs) {
+shared String metamodelString<T>(T me, Attribute<T>+ attrs) {
     value result = StringBuilder();
     result.append(`T`.string);
     result.append("{");

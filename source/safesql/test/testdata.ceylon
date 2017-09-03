@@ -24,9 +24,9 @@ import safesql.core {
     Table
 }
 import safesql.helpers {
-    reflectionEquals,
     compositeHash,
-    reflectionString
+    metamodelString,
+    metamodelEquals
 }
 
 table
@@ -68,11 +68,11 @@ class Employee extends Object {
         salary = row.get(`salary`);
     }
 
-    equals(Object that) => reflectionEquals(this, that, `id`, `name`, `salary`);
+    equals(Object that) => metamodelEquals(this, that, `id`, `name`, `salary`);
     
     hash => compositeHash(id, name, salary);
     
-    string => reflectionString(this, `id`, `name`, `salary`);
+    string => metamodelString(this, `id`, `name`, `salary`);
 }
 
 Table<Employee> employees = Table("employees", `Employee`);
