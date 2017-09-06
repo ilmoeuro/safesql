@@ -231,8 +231,7 @@ abstract class SqlEmitter(Anything(String) emit) {
         bareTableName(model);
 
         emit(" SET ");
-        value attributes = (fields else columnAttributes(model))
-            .filter((attr) => !primaryKeyAnnotation(attr) exists);
+        value attributes = fields.filter((attr) => !primaryKeyAnnotation(attr) exists);
         for (i -> attribute in attributes.indexed) {
             if (i != 0) {
                 emit(",");
