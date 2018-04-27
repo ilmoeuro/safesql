@@ -33,7 +33,7 @@ import safesql.core {
     SelectQuery,
     _equal,
     Key,
-    lessThan
+    _lessThan
 }
 import safesql.dbc {
     SafeSql
@@ -68,7 +68,7 @@ String insertEmployeesSql =
         }
     ]
 ,   [   from(employees)
-            .where(lessThan(employees.column(`Employee.salary`), 70_000.0))
+            .where(_lessThan(employees.column(`Employee.salary`), 70_000.0))
             .select(employees)
     ,   {   Employee {
                 id = Key<Employee>(1);

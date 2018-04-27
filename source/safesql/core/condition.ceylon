@@ -14,10 +14,10 @@ limitations under the License. */
 
 "A condition used in `WHERE` clauses."
 see(`function _equal`
-   ,`function atMost`
-   ,`function lessThan`
-   ,`function atLeast`
-   ,`function greaterThan`
+   ,`function _atMost`
+   ,`function _lessThan`
+   ,`function _atLeast`
+   ,`function _greaterThan`
    ,`function _and`
    ,`function _or`
    ,`function _not`)
@@ -38,7 +38,7 @@ shared Condition<Source> _equal<Source, Field>(lhs, rhs){
 }
 
 "The `<=` SQL operator"
-shared Condition<Source> atMost<Source, Field>(lhs, rhs) {
+shared Condition<Source> _atMost<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
@@ -47,7 +47,7 @@ shared Condition<Source> atMost<Source, Field>(lhs, rhs) {
 }
 
 "The `<` SQL operator"
-shared Condition<Source> lessThan<Source, Field>(lhs, rhs) {
+shared Condition<Source> _lessThan<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
@@ -56,7 +56,7 @@ shared Condition<Source> lessThan<Source, Field>(lhs, rhs) {
 }
 
 "The `>=` SQL operator"
-shared Condition<Source> atLeast<Source, Field>(lhs, rhs) {
+shared Condition<Source> _atLeast<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"
@@ -65,7 +65,7 @@ shared Condition<Source> atLeast<Source, Field>(lhs, rhs) {
 }
 
 "The `>` SQL operator"
-shared Condition<Source> greaterThan<Source, Field>(lhs, rhs) {
+shared Condition<Source> _greaterThan<Source, Field>(lhs, rhs) {
     "The database column to compare"
     Column<Source, Field> lhs;
     "The literal value to compare the database column to"

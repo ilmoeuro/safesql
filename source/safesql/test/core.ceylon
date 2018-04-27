@@ -21,7 +21,7 @@ import safesql.core {
     SelectQuery,
     Table,
     from,
-    greaterThan,
+    _greaterThan,
     Key,
     _and,
     _equal,
@@ -61,7 +61,7 @@ Table<Employee> devs = Table("devs", `Employee`);
         }
     ,   from(devs)
         .where (
-            greaterThan(devs.column(`Employee.salary`), 10_000.0)
+            _greaterThan(devs.column(`Employee.salary`), 10_000.0)
         )
         .select(devs)
     ]
